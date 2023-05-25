@@ -6,7 +6,7 @@ using namespace tokenizes;
 using namespace std;
 
 TEST(atom, char) {
-    const auto parser = atom::from('a');
+    const auto parser = atom::create('a');
 
     stringstream ss;
     std::string s;
@@ -19,7 +19,7 @@ TEST(atom, char) {
 }
 
 TEST(atom, list) {
-    const auto parser = atom::from("abc");
+    const auto parser = atom::create("abc");
 
     stringstream ss;
     std::string s;
@@ -40,23 +40,23 @@ TEST(atom, list) {
 
 TEST(atom, range) {
 
-    const auto parser = atom::from_range('2', '8');
+    const auto parser = atom::create_range('2', '8');
     stringstream ss;
     std::string s;
     empty_t empty;
     ss << "2";
-    EXPECT_TRUE((*parser)(ss, s, empty));
+    EXPECT_TRUE((*parser)(ss, s));
     ss << "8";
-    EXPECT_TRUE((*parser)(ss, s, empty));
+    EXPECT_TRUE((*parser)(ss, s));
     ss << "1";
-    EXPECT_FALSE((*parser)(ss, s, empty)), ss.ignore();
+    EXPECT_FALSE((*parser)(ss, s)), ss.ignore();
     ss << "9";
-    EXPECT_FALSE((*parser)(ss, s, empty));
+    EXPECT_FALSE((*parser)(ss, s));
 }
 
 TEST(repeat_string, repeat) {
     // auto p = base<string, empty_t>::from();
-    const auto parser = repeat_n_m(atom::from_range('0', '9'), 2, 4);
+    const auto parser = repeat_n_m(atom::create_range('0', '9'), 2, 4);
     stringstream ss;
     std::string s;
 

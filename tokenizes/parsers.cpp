@@ -64,14 +64,14 @@ std::ostream &operator<<(std::ostream &os, const atom &s) {
     return os;
 }
 
-std::shared_ptr<atom> atom::from(const chars_t &chars) { return std::make_shared<atom>(chars); }
-std::shared_ptr<atom> atom::from(uint8_t c) {
+std::shared_ptr<atom> atom::create(const chars_t &chars) { return std::make_shared<atom>(chars); }
+std::shared_ptr<atom> atom::create(uint8_t c) {
     chars_t chars;
     chars.set(c);
     return std::make_shared<atom>(chars);
 }
 
-std::shared_ptr<atom> atom::from(std::string_view sv) {
+std::shared_ptr<atom> atom::create(std::string_view sv) {
     chars_t chars;
     for (unsigned char c : sv)
         chars.set(c);
@@ -79,7 +79,7 @@ std::shared_ptr<atom> atom::from(std::string_view sv) {
     return std::make_shared<atom>(chars);
 }
 
-std::shared_ptr<atom> atom::from_range(uint8_t first, uint8_t last) {
+std::shared_ptr<atom> atom::create_range(uint8_t first, uint8_t last) {
     chars_t chars;
     for (size_t c = first; c <= last; c++)
         chars.set(c);
@@ -98,24 +98,29 @@ bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
     return true;
 }
 
+bool atom::operator()(std::stringstream &ss, std::string &s) {
+    empty_t e;
+    return (*this)(ss, s, e);
+}
+
 atom_ptr operator|(const atom_ptr &a, const atom_ptr &b) {
     const auto c = a->get_chars() | b->get_chars();
-    return atom::from(c);
+    return atom::create(c);
 }
 
 atom_ptr operator&(const atom_ptr &a, const atom_ptr &b) {
     const auto c = a->get_chars() & b->get_chars();
-    return atom::from(c);
+    return atom::create(c);
 }
 
 atom_ptr operator^(const atom_ptr &a, const atom_ptr &b) {
     const auto c = a->get_chars() ^ b->get_chars();
-    return atom::from(c);
+    return atom::create(c);
 }
 
 atom_ptr operator~(const atom_ptr &a) {
     const auto c = ~a->get_chars();
-    return atom::from(c);
+    return atom::create(c);
 }
 
 atom_mut_ptr &operator|=(atom_mut_ptr &a, const atom_ptr &b) {

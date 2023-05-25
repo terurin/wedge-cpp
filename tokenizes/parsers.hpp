@@ -62,11 +62,11 @@ public:
     constexpr const chars_t &get_chars() const { return chars; }
 
     virtual bool operator()(std::stringstream &, std::string &, empty_t &) const;
-
-    static std::shared_ptr<atom> from(const chars_t &chars);
-    static std::shared_ptr<atom> from(uint8_t c);
-    static std::shared_ptr<atom> from(std::string_view sv);
-    static std::shared_ptr<atom> from_range(uint8_t first, uint8_t last);
+    virtual bool operator()(std::stringstream &ss, std::string &s);
+    static std::shared_ptr<atom> create(const chars_t &chars);
+    static std::shared_ptr<atom> create(uint8_t c);
+    static std::shared_ptr<atom> create(std::string_view sv);
+    static std::shared_ptr<atom> create_range(uint8_t first, uint8_t last);
 };
 
 using atom_ptr = std::shared_ptr<const atom>;
@@ -82,12 +82,12 @@ atom_mut_ptr &operator|=(atom_mut_ptr &a, const atom_ptr &b);
 atom_mut_ptr &operator&=(atom_mut_ptr &a, const atom_ptr &b);
 atom_mut_ptr &operator^=(atom_mut_ptr &a, const atom_ptr &b);
 
-static inline atom_ptr sign = atom::from("+-");
-static inline atom_ptr dot = atom::from(".");
-static inline atom_ptr small = atom::from_range('a', 'z');
-static inline atom_ptr large = atom::from_range('A', 'Z');
+static inline atom_ptr sign = atom::create("+-");
+static inline atom_ptr dot = atom::create(".");
+static inline atom_ptr small = atom::create_range('a', 'z');
+static inline atom_ptr large = atom::create_range('A', 'Z');
 static inline atom_ptr alpha = small | large;
-static inline atom_ptr digit = atom::from_range('0', '9');
+static inline atom_ptr digit = atom::create_range('0', '9');
 static inline atom_ptr alnum = small | large | digit;
 
 template <class R = std::string, class L = empty_t> struct repeat : public base<R, L> {
