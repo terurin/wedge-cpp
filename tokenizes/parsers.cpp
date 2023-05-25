@@ -87,16 +87,6 @@ std::shared_ptr<atom> atom::from_range(uint8_t first, uint8_t last) {
     return std::make_shared<atom>(chars);
 }
 
-bool atom::operator()(std::stringstream &ss, char &c, empty_t &e) const {
-    c = ss.peek();
-    if (c == -1 || !chars.test(c)) {
-        return false;
-    }
-
-    ss.ignore();
-    return true;
-}
-
 bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
     const char c = ss.peek();
     if (c == -1 || !chars.test(c)) {
@@ -108,12 +98,39 @@ bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
     return true;
 }
 
-atom_ptr operator|(const atom_ptr &a, const atom_ptr &b) { return atom::from(a->get_chars() | b->get_chars()); }
-atom_ptr operator|=(atom_ptr &a, const atom_ptr &b) { return a->get_chars() |= b->get_chars(), a; }
-atom_ptr operator&(const atom_ptr &a, const atom_ptr &b) { return atom::from(a->get_chars() & b->get_chars()); }
-atom_ptr &operator&=(atom_ptr &a, const atom_ptr &b) { return a->get_chars() &= b->get_chars(), a; }
-atom_ptr operator^(const atom_ptr &a, const atom_ptr &b) { return atom::from(a->get_chars() ^ b->get_chars()); }
-atom_ptr &operator^=(atom_ptr &a, const atom_ptr &b) { return a->get_chars() ^= b->get_chars(), a; }
-atom_ptr operator~(const atom_ptr &a) { return atom::from(~a->get_chars()); }
+atom_ptr operator|(const atom_ptr &a, const atom_ptr &b) {
+    const auto c = a->get_chars() | b->get_chars();
+    return atom::from(c);
+}
+
+atom_ptr operator&(const atom_ptr &a, const atom_ptr &b) {
+    const auto c = a->get_chars() & b->get_chars();
+    return atom::from(c);
+}
+
+atom_ptr operator^(const atom_ptr &a, const atom_ptr &b) {
+    const auto c = a->get_chars() ^ b->get_chars();
+    return atom::from(c);
+}
+
+atom_ptr operator~(const atom_ptr &a) {
+    const auto c = ~a->get_chars();
+    return atom::from(c);
+}
+
+atom_mut_ptr &operator|=(atom_mut_ptr &a, const atom_ptr &b) {
+    a->get_chars() |= b->get_chars();
+    return a;
+}
+
+atom_mut_ptr &operator&=(atom_mut_ptr &a, const atom_ptr &b) {
+    a->get_chars() &= b->get_chars();
+    return a;
+}
+
+atom_mut_ptr &operator^=(atom_mut_ptr &a, const atom_ptr &b) {
+    a->get_chars() ^= b->get_chars();
+    return a;
+}
 
 } // namespace tokenizes

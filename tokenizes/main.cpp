@@ -9,10 +9,10 @@ int main(int argc, char **argv) {
     ss << "aa";
     ss.seekg(0);
     char c;
-    empty_t empty;
+    // empty_t empty;
     string s;
 
-    if (repeat_string<empty_t>(atom::from('a'), 1)(ss, s, empty)) {
+    if ((*repeat_n_m(atom::from('a'), 1, 2))(ss, s)) {
         cout << "pass:" << s;
     } else {
         cout << "fail:" << s;

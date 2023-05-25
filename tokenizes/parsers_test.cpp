@@ -53,3 +53,33 @@ TEST(atom, range) {
     ss << "9";
     EXPECT_FALSE((*parser)(ss, s, empty));
 }
+
+TEST(repeat_string, repeat) {
+    // auto p = base<string, empty_t>::from();
+    const auto parser = repeat_n_m(atom::from_range('0', '9'), 2, 4);
+    stringstream ss;
+    std::string s;
+
+    // 1
+    s.clear();
+    ss.str("0");
+    EXPECT_FALSE((*parser)(ss, s));
+
+    // 2
+    s.clear();
+    ss.clear();
+    ss.str("01");
+    EXPECT_TRUE((*parser)(ss, s) && s == "01");
+
+    // 4
+    s.clear();
+    ss.clear();
+    ss.str("0123");
+    EXPECT_TRUE((*parser)(ss, s) && s == "0123");
+
+    // 5
+    s.clear();
+    ss.clear();
+    ss.str("01234");
+    EXPECT_TRUE((*parser)(ss, s) && s == "0123");
+}
