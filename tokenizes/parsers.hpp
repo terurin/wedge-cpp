@@ -62,7 +62,7 @@ public:
     constexpr const chars_t &get_chars() const { return chars; }
 
     virtual bool operator()(std::stringstream &, std::string &, empty_t &) const;
-    virtual bool operator()(std::stringstream &ss, std::string &s)const;
+    virtual bool operator()(std::stringstream &ss, std::string &s) const;
     static std::shared_ptr<atom> create(const chars_t &chars);
     static std::shared_ptr<atom> create(uint8_t c);
     static std::shared_ptr<atom> create(std::string_view sv);
@@ -98,22 +98,7 @@ public:
     repeat(base_ptr<R, L> _parser, size_t _min = 0, size_t _max = SIZE_MAX) : parser(_parser), min(_min), max(_max) {
         assert(_min <= _max);
     }
-    virtual bool operator()(std::stringstream &ss, R &r, L &l) const {
-        size_t count = 0;
-
-        for (; count < min; count++) {
-            if (!(*parser)(ss, r, l)) {
-                return false;
-            }
-        }
-        for (; count < max; count++) {
-            if (!(*parser)(ss, r, l)) {
-                return true;
-            }
-        }
-        return true;
-    }
-
+    virtual bool operator()(std::stringstream &ss, R &r, L &l) const;
     static base_ptr<R, L> create(base_ptr<R, L> p, size_t min = 0, size_t max = SIZE_MAX) {
         return std::make_shared<repeat<R, L>>(p, min, max);
     }
@@ -152,3 +137,4 @@ static inline base_ptr<std::string, empty_t> many0(base_ptr<std::string, empty_t
 }
 
 } // namespace tokenizes
+#include "parsers.cxx"
