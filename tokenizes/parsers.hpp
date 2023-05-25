@@ -62,7 +62,7 @@ public:
     constexpr const chars_t &get_chars() const { return chars; }
 
     virtual bool operator()(std::stringstream &, std::string &, empty_t &) const;
-    virtual bool operator()(std::stringstream &ss, std::string &s);
+    virtual bool operator()(std::stringstream &ss, std::string &s)const;
     static std::shared_ptr<atom> create(const chars_t &chars);
     static std::shared_ptr<atom> create(uint8_t c);
     static std::shared_ptr<atom> create(std::string_view sv);

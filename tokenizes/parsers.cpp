@@ -98,7 +98,7 @@ bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
     return true;
 }
 
-bool atom::operator()(std::stringstream &ss, std::string &s) {
+bool atom::operator()(std::stringstream &ss, std::string &s) const{
     empty_t e;
     return (*this)(ss, s, e);
 }
