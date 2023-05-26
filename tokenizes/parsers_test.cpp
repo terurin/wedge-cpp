@@ -54,7 +54,7 @@ TEST(atom, range) {
     EXPECT_FALSE((*parser)(ss, s));
 }
 
-TEST(repeat_string, repeat) {
+TEST(repeat, repeat) {
     // auto p = base<string, empty_t>::from();
     const auto parser = repeat_n_m(atom::create_range('0', '9'), 2, 4);
     stringstream ss;

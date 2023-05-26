@@ -29,19 +29,9 @@ struct empty_t {
 template <class R, class L = empty_t> struct base : public std::enable_shared_from_this<base<R, L>> {
     using right_t = R;
     using left_t = L;
-    virtual bool operator()(std::stringstream &, right_t &, left_t &) const = 0;
-    operator std::shared_ptr<base>() { return this->shared_from_this(); }
-    operator std::shared_ptr<const base>() const { return this->shared_from_this(); }
-};
-
-template <class R> struct base<R, empty_t> : public std::enable_shared_from_this<base<R, empty_t>> {
-    using right_t = R;
-    using left_t = empty_t;
-    virtual bool operator()(std::stringstream &, right_t &, left_t &) const = 0;
-    virtual bool operator()(std::stringstream &ss, right_t &r) const {
-        empty_t empty;
-        return (*this)(ss, r, empty);
-    }
+    virtual bool operator()(std::stringstream &, right_t &r, left_t &) const = 0;
+    virtual bool operator()(std::stringstream &ss, right_t &r) const;
+    virtual bool operator()(std::stringstream &ss) const;
     operator std::shared_ptr<base>() { return this->shared_from_this(); }
     operator std::shared_ptr<const base>() const { return this->shared_from_this(); }
 };
@@ -52,17 +42,17 @@ template <class R, class L = empty_t> using base_mut_ptr = std::shared_ptr<base<
 struct atom : public base<std::string, empty_t> {
     using chars_t = std::bitset<256>;
     chars_t chars;
+    constexpr atom(const chars_t &_chars) : chars(_chars) {}
 
 public:
-    constexpr atom() = default;
-    constexpr atom(const chars_t &_chars) : chars(_chars) {}
     atom(const atom &) = default;
     atom(atom &&) = default;
     constexpr chars_t &get_chars() { return chars; }
     constexpr const chars_t &get_chars() const { return chars; }
 
-    virtual bool operator()(std::stringstream &, std::string &, empty_t &) const;
-    virtual bool operator()(std::stringstream &ss, std::string &s) const;
+    virtual bool operator()(std::stringstream &, std::string &, empty_t &) const override;
+    virtual bool operator()(std::stringstream &, std::string &) const override;
+    virtual bool operator()(std::stringstream &) const override;
     static std::shared_ptr<atom> create(const chars_t &chars);
     static std::shared_ptr<atom> create(uint8_t c);
     static std::shared_ptr<atom> create(std::string_view sv);
@@ -93,46 +83,50 @@ static inline atom_ptr alnum = small | large | digit;
 template <class R = std::string, class L = empty_t> struct repeat : public base<R, L> {
     const size_t min, max;
     base_ptr<std::string, L> parser;
-
-public:
     repeat(base_ptr<R, L> _parser, size_t _min = 0, size_t _max = SIZE_MAX) : parser(_parser), min(_min), max(_max) {
         assert(_min <= _max);
     }
-    virtual bool operator()(std::stringstream &ss, R &r, L &l) const;
-    static base_ptr<R, L> create(base_ptr<R, L> p, size_t min = 0, size_t max = SIZE_MAX) {
+
+public:
+    virtual bool operator()(std::stringstream &ss, R &r, L &l) const override;
+    virtual bool operator()(std::stringstream &ss, R &r) const override;
+    virtual bool operator()(std::stringstream &ss) const override;
+
+    static std::shared_ptr<repeat<R, L>> create(base_ptr<R, L> p, size_t min = 0, size_t max = SIZE_MAX) {
         return std::make_shared<repeat<R, L>>(p, min, max);
     }
 };
 
-template <class R, class L> base_ptr<std::string, L> repeat_n_m(base_ptr<std::string, L> p, size_t n, size_t m) {
+template <class R, class L> using repeat_mut_ptr = std::shared_ptr<const repeat<R, L>>;
+template <class R, class L> using repeat_ptr = std::shared_ptr<repeat<R, L>>;
+
+template <class R, class L> repeat_mut_ptr<R, L> repeat_n_m(base_ptr<R, L> p, size_t n, size_t m) {
     return repeat<L>::create(p, n, m);
 }
 
-static inline base_ptr<std::string, empty_t> repeat_n_m(base_ptr<std::string, empty_t> p, size_t n, size_t m) {
+static inline repeat_mut_ptr<std::string, empty_t> repeat_n_m(base_ptr<std::string, empty_t> p, size_t n, size_t m) {
     return repeat<std::string, empty_t>::create(p, n, m);
 }
 
-template <class R, class L> base_ptr<std::string, L> repeat_n(base_ptr<std::string, L> p, size_t n) {
+template <class R, class L> repeat_mut_ptr<R, L> repeat_n(base_ptr<R, L> p, size_t n) {
     return repeat<L>::create(p, n, n);
 }
 
-static inline base_ptr<std::string, empty_t> repeat_n(base_ptr<std::string, empty_t> p, size_t n) {
+static inline repeat_mut_ptr<std::string, empty_t> repeat_n(base_ptr<std::string, empty_t> p, size_t n) {
     return repeat<std::string, empty_t>::create(p, n, n);
 }
 
-template <class R, class L> base_ptr<std::string, L> many1(base_ptr<std::string, L> p) {
-    return repeat<L>::create(p, 1);
-}
+template <class R, class L> repeat_mut_ptr<std::string, L> many1(base_ptr<R, L> p) { return repeat<L>::create(p, 1); }
 
-static inline base_ptr<std::string, empty_t> many1(base_ptr<std::string, empty_t> p) {
+static inline repeat_mut_ptr<std::string, empty_t> many1(base_ptr<std::string, empty_t> p) {
     return repeat<std::string, empty_t>::create(p, 1);
 }
 
-template <class R, class L> base_ptr<std::string, L> many0(base_ptr<std::string, L> p, size_t n) {
+template <class R, class L> repeat_mut_ptr<std::string, L> many0(base_ptr<R, L> p, size_t n) {
     return repeat<L>::create(p);
 }
 
-static inline base_ptr<std::string, empty_t> many0(base_ptr<std::string, empty_t> p, size_t n) {
+static inline repeat_mut_ptr<std::string, empty_t> many0(base_ptr<std::string, empty_t> p, size_t n) {
     return repeat<std::string, empty_t>::create(p);
 }
 

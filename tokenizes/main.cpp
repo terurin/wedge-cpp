@@ -9,10 +9,12 @@ int main(int argc, char **argv) {
     ss << "aa";
     ss.seekg(0);
     char c;
-    // empty_t empty;
+    //empty_t empty;
     string s;
 
-    if ((*repeat_n_m(atom::create('a'), 1, 2))(ss, s)) {
+    auto parser = repeat_n_m(atom::create('a'), 1, 2);
+
+    if ((*parser)(ss, s)) {
         cout << "pass:" << s;
     } else {
         cout << "fail:" << s;

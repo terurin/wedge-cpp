@@ -88,7 +88,7 @@ std::shared_ptr<atom> atom::create_range(uint8_t first, uint8_t last) {
 }
 
 bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
-    const char c = ss.peek();
+    const int c = ss.peek();
     if (c == -1 || !chars.test(c)) {
         return false;
     }
@@ -98,9 +98,25 @@ bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
     return true;
 }
 
-bool atom::operator()(std::stringstream &ss, std::string &s) const{
-    empty_t e;
-    return (*this)(ss, s, e);
+bool atom::operator()(std::stringstream &ss, std::string &s) const {
+    const int c = ss.peek();
+    if (c == -1 || !chars.test(c)) {
+        return false;
+    }
+
+    ss.ignore();
+    s.push_back(c);
+    return true;
+}
+
+bool atom::operator()(std::stringstream &ss) const {
+    const int c = ss.peek();
+    if (c == -1 || !chars.test(c)) {
+        return false;
+    }
+
+    ss.ignore();
+    return true;
 }
 
 atom_ptr operator|(const atom_ptr &a, const atom_ptr &b) {
