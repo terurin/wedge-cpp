@@ -9,14 +9,24 @@ int main(int argc, char **argv) {
     ss << "aa";
     ss.seekg(0);
     char c;
-    //empty_t empty;
+    // empty_t empty;
     string s;
 
-    auto parser = repeat_n_m(atom::create('a'), 1, 2);
+    // auto parser =
+    //  mapper<std::string, std::string, empty_t>::create(atom::create('a'), [](std::string &d, const std::string &s) {
+    //      d = s + "1";
+    //      return true;
+    //  });
 
+    auto parser = atom::create("a")
+                      ->map<std::string>([](std::string &out, const std::string &in) -> bool {
+                          out += in + "0";
+                          return true;
+                      })
+                      ->repeat_n(2);
     if ((*parser)(ss, s)) {
-        cout << "pass:" << s;
+        cout << "pass:" << s << endl;
     } else {
-        cout << "fail:" << s;
+        cout << "fail:" << s << endl;
     }
 }

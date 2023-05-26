@@ -83,3 +83,46 @@ TEST(repeat, repeat) {
     ss.str("01234");
     EXPECT_TRUE((*parser)(ss, s) && s == "0123");
 }
+
+TEST(mapper, mapper) {
+    const auto parser = atom::create("1")->map<int>([](int &out, const std::string &in) {
+        if (in != "1") {
+            return false;
+        }
+        out = 1;
+        return true;
+    });
+    stringstream ss;
+    int out;
+
+    // success
+    ss.str("1");
+    EXPECT_TRUE((*parser)(ss, out) && out == 1);
+
+    // failed
+    ss.clear();
+    ss.str("0");
+    EXPECT_FALSE((*parser)(ss, out));
+}
+
+TEST(error_mapper, error_mapper) {
+    
+    const auto parser = atom::create("1")->map_err<int>([](int &out, const empty_t &in) {
+        out = 1;
+        return true;
+    });
+
+    stringstream ss;
+    string r;
+    int l;
+    
+    // fail
+    l=0;
+    ss.str("0");
+    EXPECT_FALSE((*parser)(ss, r, l) && l == 1);
+
+    // success
+    l=0;
+    ss.str("1");
+    EXPECT_TRUE((*parser)(ss, r, l));
+}
