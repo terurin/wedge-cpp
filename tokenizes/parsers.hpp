@@ -67,12 +67,12 @@ template <class R, class L> struct base : public std::enable_shared_from_this<ba
 template <class R, class L> using base_ptr = std::shared_ptr<const base<R, L>>;
 template <class R, class L> using base_mut_ptr = std::shared_ptr<base<R, L>>;
 
-struct atom : public base<std::string, empty_t> {
+class atom : public base<std::string, empty_t> {
     using chars_t = std::bitset<256>;
     chars_t chars;
-    constexpr atom(const chars_t &_chars) : chars(_chars) {}
 
 public:
+    constexpr atom(const chars_t &_chars) : chars(_chars) {}
     atom(const atom &) = default;
     atom(atom &&) = default;
     constexpr chars_t &get_chars() { return chars; }
@@ -108,14 +108,14 @@ static inline atom_ptr alpha = small | large;
 static inline atom_ptr digit = atom::create_range('0', '9');
 static inline atom_ptr alnum = small | large | digit;
 
-template <class R, class L> struct repeat : public base<R, L> {
+template <class R, class L> class repeat : public base<R, L> {
     const size_t min, max;
     base_ptr<std::string, L> parser;
+
+public:
     repeat(base_ptr<R, L> &&_parser, size_t _min = 0, size_t _max = SIZE_MAX) : parser(_parser), min(_min), max(_max) {
         assert(_min <= _max);
     }
-
-public:
     virtual bool operator()(std::stringstream &ss, R &r, L &l) const override;
     virtual bool operator()(std::stringstream &ss, R &r) const override;
     virtual bool operator()(std::stringstream &ss) const override;
