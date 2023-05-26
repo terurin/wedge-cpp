@@ -111,7 +111,7 @@ static inline atom_ptr alnum = small | large | digit;
 template <class R, class L> struct repeat : public base<R, L> {
     const size_t min, max;
     base_ptr<std::string, L> parser;
-    repeat(base_ptr<R, L> _parser, size_t _min = 0, size_t _max = SIZE_MAX) : parser(_parser), min(_min), max(_max) {
+    repeat(base_ptr<R, L> &&_parser, size_t _min = 0, size_t _max = SIZE_MAX) : parser(_parser), min(_min), max(_max) {
         assert(_min <= _max);
     }
 
@@ -120,44 +120,44 @@ public:
     virtual bool operator()(std::stringstream &ss, R &r) const override;
     virtual bool operator()(std::stringstream &ss) const override;
 
-    static std::shared_ptr<repeat<R, L>> create(base_ptr<R, L> p, size_t min = 0, size_t max = SIZE_MAX) {
-        return std::make_shared<repeat<R, L>>(p, min, max);
+    static std::shared_ptr<repeat<R, L>> create(base_ptr<R, L> &&p, size_t min = 0, size_t max = SIZE_MAX) {
+        return std::make_shared<repeat<R, L>>(std::move(p), min, max);
     }
 };
 
 template <class R, class L> using repeat_mut_ptr = std::shared_ptr<const repeat<R, L>>;
 template <class R, class L> using repeat_ptr = std::shared_ptr<repeat<R, L>>;
 
-template <class R, class L> repeat_mut_ptr<R, L> repeat_n_m(base_ptr<R, L> p, size_t n, size_t m) {
-    return repeat<R, L>::create(p, n, m);
+template <class R, class L> repeat_mut_ptr<R, L> repeat_n_m(base_ptr<R, L> &&p, size_t n, size_t m) {
+    return repeat<R, L>::create(std::move(p), n, m);
 }
 
-static inline repeat_mut_ptr<std::string, empty_t> repeat_n_m(base_ptr<std::string, empty_t> p, size_t n, size_t m) {
-    return repeat<std::string, empty_t>::create(p, n, m);
+static inline repeat_mut_ptr<std::string, empty_t> repeat_n_m(base_ptr<std::string, empty_t> &&p, size_t n, size_t m) {
+    return repeat<std::string, empty_t>::create(std::move(p), n, m);
 }
 
-template <class R, class L> repeat_mut_ptr<R, L> repeat_n(base_ptr<R, L> p, size_t n) {
-    return repeat<R, L>::create(p, n, n);
+template <class R, class L> repeat_mut_ptr<R, L> repeat_n(base_ptr<R, L> &&p, size_t n) {
+    return repeat<R, L>::create(std::move(p), n, n);
 }
 
-static inline repeat_mut_ptr<std::string, empty_t> repeat_n(base_ptr<std::string, empty_t> p, size_t n) {
-    return repeat<std::string, empty_t>::create(p, n, n);
+static inline repeat_mut_ptr<std::string, empty_t> repeat_n(base_ptr<std::string, empty_t> &&p, size_t n) {
+    return repeat<std::string, empty_t>::create(std::move(p), n, n);
 }
 
-template <class R, class L> repeat_mut_ptr<std::string, L> many1(base_ptr<R, L> p) {
-    return repeat<R, L>::create(p, 1);
+template <class R, class L> repeat_mut_ptr<std::string, L> many1(base_ptr<R, L> &&p) {
+    return repeat<R, L>::create(std::move(p), 1);
 }
 
-static inline repeat_mut_ptr<std::string, empty_t> many1(base_ptr<std::string, empty_t> p) {
-    return repeat<std::string, empty_t>::create(p, 1);
+static inline repeat_mut_ptr<std::string, empty_t> many1(base_ptr<std::string, empty_t> &&p) {
+    return repeat<std::string, empty_t>::create(std::move(p), 1);
 }
 
-template <class R, class L> repeat_mut_ptr<std::string, L> many0(base_ptr<R, L> p, size_t n) {
-    return repeat<R, L>::create(p);
+template <class R, class L> repeat_mut_ptr<std::string, L> many0(base_ptr<R, L> &&p, size_t n) {
+    return repeat<R, L>::create(std::move(p));
 }
 
-static inline repeat_mut_ptr<std::string, empty_t> many0(base_ptr<std::string, empty_t> p, size_t n) {
-    return repeat<std::string, empty_t>::create(p);
+static inline repeat_mut_ptr<std::string, empty_t> many0(base_ptr<std::string, empty_t> &&p, size_t n) {
+    return repeat<std::string, empty_t>::create(std::move(p));
 }
 
 template <class RO, class RI, class L> class mapper : public base<RO, L> {
@@ -169,15 +169,15 @@ private:
     const func_t func;
 
 public:
-    mapper(base_ptr<RI, L> _parser, func_t _func) : parser(_parser), func(_func) {}
+    mapper(base_ptr<RI, L> &&_parser, func_t _func) : parser(_parser), func(_func) {}
     mapper(const mapper &) = default;
     mapper(mapper &&) = default;
     virtual bool operator()(std::stringstream &ss, RO &ro, L &l) const override;
     virtual bool operator()(std::stringstream &ss, RO &ro) const override;
     virtual bool operator()(std::stringstream &ss) const override;
 
-    static std::shared_ptr<mapper<RO, RI, L>> create(base_ptr<RI, L> parser, func_t func) {
-        return std::make_shared<mapper<RO, RI, L>>(parser, func);
+    static std::shared_ptr<mapper<RO, RI, L>> create(base_ptr<RI, L> &&parser, func_t func) {
+        return std::make_shared<mapper<RO, RI, L>>(std::move(parser), func);
     }
 };
 
@@ -198,13 +198,13 @@ private:
     const func_t func;
 
 public:
-    mapper_error(base_ptr<R, LI> _parser, func_t _func) : parser(_parser), func(_func) {}
+    mapper_error(base_ptr<R, LI> &&_parser, func_t _func) : parser(_parser), func(_func) {}
     mapper_error(const mapper_error &) = default;
     mapper_error(mapper_error &&) = default;
     virtual bool operator()(std::stringstream &ss, R &r, LO &l) const override;
 
-    static std::shared_ptr<mapper_error<R, LO, LI>> create(base_ptr<R, LI> parser, func_t func) {
-        return std::make_shared<mapper_error<R, LO, LI>>(parser, func);
+    static std::shared_ptr<mapper_error<R, LO, LI>> create(base_ptr<R, LI> &&parser, func_t func) {
+        return std::make_shared<mapper_error<R, LO, LI>>(std::move(parser), func);
     }
 };
 
