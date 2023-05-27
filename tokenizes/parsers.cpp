@@ -154,4 +154,44 @@ atom_mut_ptr &operator^=(atom_mut_ptr &a, const atom_ptr &b) {
     return a;
 }
 
+bool tag::operator()(std::stringstream &ss, std::string &r, empty_t &l) const {
+
+    auto pos = ss.tellg();
+    for (const char c : str) {
+        const int input = ss.get();
+        if (input != -1 && input != c) {
+            ss.seekg(pos);
+            return false;
+        }
+    }
+    r += str;
+    return true;
+}
+
+bool tag::operator()(std::stringstream &ss, std::string &r) const {
+
+    auto pos = ss.tellg();
+    for (const char c : str) {
+        const int input = ss.get();
+        if (input != -1 && input != c) {
+            ss.seekg(pos);
+            return false;
+        }
+    }
+    r += str;
+    return true;
+}
+
+bool tag::operator()(std::stringstream &ss) const {
+    auto pos = ss.tellg();
+    for (const char c : str) {
+        const int input = ss.get();
+        if (input != -1 && input != c) {
+            ss.seekg(pos);
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace tokenizes

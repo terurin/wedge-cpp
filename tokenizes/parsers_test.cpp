@@ -117,3 +117,26 @@ TEST(error_mapper, error_mapper) {
     ss.str("1");
     EXPECT_TRUE((*parser)(ss, r, l));
 }
+
+TEST(tag, tag) {
+    const auto parser = tag::create("abc");
+    stringstream ss;
+    string r;
+
+    // success
+    ss.str("abc");
+    EXPECT_TRUE((*parser)(ss, r) && r == "abc");
+
+    // fail (all mismatch)
+    r.clear();
+    ss.clear();
+    ss.str("xyz");
+    EXPECT_FALSE((*parser)(ss, r));
+    EXPECT_EQ(r,"");
+
+    r.clear();
+    ss.clear();
+    ss.str("abz");
+    EXPECT_FALSE((*parser)(ss, r));
+    EXPECT_EQ(r,"");
+}

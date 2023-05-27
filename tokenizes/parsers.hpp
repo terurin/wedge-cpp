@@ -109,16 +109,6 @@ static inline atom_ptr alpha = small | large;
 static inline atom_ptr digit = atom::create_range('0', '9');
 static inline atom_ptr alnum = small | large | digit;
 
-// class text : public base<std::string, empty_t> {
-//     std::string s;
-
-// public:
-//     text(std::string_view sv) : s(sv) {}
-//     virtual bool operator()(std::stringstream &ss, std::string &r, empty_t &l) const override;
-//     virtual bool operator()(std::stringstream &ss, std::string &r) const override;
-//     virtual bool operator()(std::stringstream &ss) const override;
-// };
-
 template <class R, class L> class repeat : public base<R, L> {
     const size_t min, max;
     base_ptr<std::string, L> parser;
@@ -217,6 +207,21 @@ public:
     static std::shared_ptr<mapper_error<R, LO, LI>> create(base_ptr<R, LI> &&parser, func_t func) {
         return std::make_shared<mapper_error<R, LO, LI>>(std::move(parser), func);
     }
+};
+
+class tag : public base<std::string, empty_t> {
+    const std::string str;
+
+public:
+    tag(std::string_view sv) : str(sv) {}
+    virtual bool operator()(std::stringstream &ss, std::string &r, empty_t &l) const override;
+    virtual bool operator()(std::stringstream &ss, std::string &r) const override;
+    virtual bool operator()(std::stringstream &ss) const override;
+
+    static std::shared_ptr<tag> create(std::string_view sv){
+        return std::make_shared<tag>(sv);
+    }
+
 };
 
 } // namespace tokenizes
