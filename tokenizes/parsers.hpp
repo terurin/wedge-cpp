@@ -196,7 +196,7 @@ template <class RO, class RI, class L> using mapper_ptr = std::shared_ptr<const 
 template <class RO, class RI, class L> using mapper_mut_ptr = std::shared_ptr<mapper<RO, RI, L>>;
 
 template <class RO, class RI, class L>
-mapper_mut_ptr<RO, RI, L> map(base_ptr<RI, L> base, std::function<bool(RO &, const RI &)> func) {
+mapper_mut_ptr<RO, RI, L> map(base_ptr<RI, L> base, std::function<RO(const RI &)> func) {
     return mapper<RO, RI, L>::create(base, func);
 }
 
