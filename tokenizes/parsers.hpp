@@ -232,10 +232,11 @@ public:
 };
 
 class tag : public base<std::string, empty_t> {
-    const std::string str;
+    std::string str;
 
 public:
     tag(std::string_view sv) : str(sv) {}
+    tag &set(std::string_view sv) { return str = sv, *this; }
     virtual bool operator()(std::stringstream &ss, std::string &r, empty_t &l) const override;
     virtual bool operator()(std::stringstream &ss, std::string &r) const override {
         empty_t l;
@@ -248,6 +249,29 @@ public:
     }
 
     static std::shared_ptr<tag> create(std::string_view sv) { return std::make_shared<tag>(sv); }
+};
+
+template <class R, class L> class choose : public base<R, L> {
+    std::vector<const base_ptr<R, L>> list;
+
+public:
+    choose(std::vector<const base_ptr<R, L>> &&_list) : list(_list){};
+    choose<R, L> &add(base_ptr<R, L> &&item) { return list.push_back(item), *this; }
+
+    virtual bool operator()(std::stringstream &ss, R &r, L &l) const override;
+    virtual bool operator()(std::stringstream &ss, R &r) const override {
+        L l;
+        return (*this)(ss, r, l);
+    }
+    virtual bool operator()(std::stringstream &ss) const override {
+        R r;
+        L l;
+        return (*this)(ss, r, l);
+    }
+
+    static std::shared_ptr<choose<R, L>> create(std::vector<base_ptr<R, L>> &&list) {
+        return std::make_shared<choose<R, L>>(std::move(list));
+    };
 };
 
 } // namespace tokenizes

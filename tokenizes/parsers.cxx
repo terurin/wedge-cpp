@@ -51,4 +51,6 @@ bool mapper_error<R, LO, LI>::operator()(std::stringstream &ss, R &r, LO &lo) co
     return false;
 }
 
+template <class R, class L> bool choose<R, L>::operator()(std::stringstream &ss, R &r, L &l) const { return false; }
+
 } // namespace tokenizes
