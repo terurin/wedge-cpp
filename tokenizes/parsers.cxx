@@ -67,7 +67,8 @@ template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::s
     if (!(*parser)(ss, ri, l)) {
         return false;
     }
-    return func(ro, ri);
+    ro = func(ri);
+    return true;
 }
 
 template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::stringstream &ss, RO &ro) const {
@@ -75,7 +76,8 @@ template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::s
     if (!(*parser)(ss, ri)) {
         return false;
     }
-    return func(ro, ri);
+    ro = func(ri);
+    return true;
 }
 
 template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::stringstream &ss) const {
@@ -83,8 +85,8 @@ template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::s
     if (!(*parser)(ss, ri)) {
         return false;
     }
-    RO ro;
-    return func(ro, ri);
+    RO ro = func(ri);
+    return true;
 }
 
 template <class R, class LO, class LI>
@@ -94,9 +96,7 @@ bool mapper_error<R, LO, LI>::operator()(std::stringstream &ss, R &r, LO &lo) co
         return true;
     }
 
-    if (!func(lo, li)) {
-        std::cerr << "error mapper failed" << std::endl;
-    }
+    lo = func(li);
 
     return false;
 }

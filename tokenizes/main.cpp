@@ -18,13 +18,9 @@ int main(int argc, char **argv) {
     //      return true;
     //  });
 
-    auto parser = atom::create("a")
-                      ->map<std::string>([](std::string &out, const std::string &in) -> bool {
-                          out += in + "0";
-                          return true;
-                      })
-                      ->repeat_n(2);
-    if ((*parser)(ss, s)) {
+    auto parser = atom::create("a")->map([](const std::string &in) ->int { return 1; });
+    int d = 0;
+    if ((*parser)(ss, d)) {
         cout << "pass:" << s << endl;
     } else {
         cout << "fail:" << s << endl;

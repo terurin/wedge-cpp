@@ -85,13 +85,7 @@ TEST(repeat, repeat) {
 }
 
 TEST(mapper, mapper) {
-    const auto parser = atom::create("1")->map<int>([](int &out, const std::string &in) {
-        if (in != "1") {
-            return false;
-        }
-        out = 1;
-        return true;
-    });
+    const auto parser = atom::create("1")->map([](const std::string &in) { return 1; });
     stringstream ss;
     int out;
 
@@ -106,23 +100,20 @@ TEST(mapper, mapper) {
 }
 
 TEST(error_mapper, error_mapper) {
-    
-    const auto parser = atom::create("1")->map_err<int>([](int &out, const empty_t &in) {
-        out = 1;
-        return true;
-    });
+
+    const auto parser = atom::create("1")->map_err([](const empty_t &in) -> int { return 1; });
 
     stringstream ss;
     string r;
     int l;
-    
+
     // fail
-    l=0;
+    l = 0;
     ss.str("0");
     EXPECT_FALSE((*parser)(ss, r, l) && l == 1);
 
     // success
-    l=0;
+    l = 0;
     ss.str("1");
     EXPECT_TRUE((*parser)(ss, r, l));
 }

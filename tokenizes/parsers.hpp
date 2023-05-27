@@ -54,13 +54,14 @@ template <class R, class L> struct base : public std::enable_shared_from_this<ba
     std::shared_ptr<repeat<R, L>> many0() const { return repeat<R, L>::create(this->shared_from_this(), 0); }
 
     /* mapper */
-    template <class RO> std::shared_ptr<mapper<RO, R, L>> map(std::function<bool(RO &, const R &)> func) const {
-        return mapper<RO, R, L>::create(this->shared_from_this(), func);
+    template <std::invocable<R> F> auto map(F func) const {
+        R r;
+        return mapper<typename std::invoke_result_t<F, R>, R, L>::create(this->shared_from_this(), func);
     }
 
-    template <class LO>
-    std::shared_ptr<mapper_error<R, LO, L>> map_err(std::function<bool(LO &, const L &)> func) const {
-        return mapper_error<R, LO, L>::create(this->shared_from_this(), func);
+    template <std::invocable<L> F> auto map_err(F func) const {
+        L l;
+        return mapper_error<R, typename std::invoke_result_t<F, L>, L>::create(this->shared_from_this(), func);
     }
 };
 
@@ -107,6 +108,16 @@ static inline atom_ptr large = atom::create_range('A', 'Z');
 static inline atom_ptr alpha = small | large;
 static inline atom_ptr digit = atom::create_range('0', '9');
 static inline atom_ptr alnum = small | large | digit;
+
+// class text : public base<std::string, empty_t> {
+//     std::string s;
+
+// public:
+//     text(std::string_view sv) : s(sv) {}
+//     virtual bool operator()(std::stringstream &ss, std::string &r, empty_t &l) const override;
+//     virtual bool operator()(std::stringstream &ss, std::string &r) const override;
+//     virtual bool operator()(std::stringstream &ss) const override;
+// };
 
 template <class R, class L> class repeat : public base<R, L> {
     const size_t min, max;
@@ -162,7 +173,7 @@ static inline repeat_mut_ptr<std::string, empty_t> many0(base_ptr<std::string, e
 
 template <class RO, class RI, class L> class mapper : public base<RO, L> {
 public:
-    using func_t = std::function<bool(RO &, const RI &)>;
+    using func_t = std::function<RO(const RI &)>;
 
 private:
     base_ptr<RI, L> parser;
@@ -191,7 +202,7 @@ mapper_mut_ptr<RO, RI, L> map(base_ptr<RI, L> base, std::function<bool(RO &, con
 
 template <class R, class LO, class LI> class mapper_error : public base<R, LO> {
 public:
-    using func_t = std::function<bool(LO &, const LI &)>;
+    using func_t = std::function<LO(const LI &)>;
 
 private:
     base_ptr<R, LI> parser;
