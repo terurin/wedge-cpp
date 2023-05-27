@@ -30,62 +30,12 @@ template <class R, class L> bool repeat<R, L>::operator()(std::stringstream &ss,
     return true;
 }
 
-template <class R, class L> bool repeat<R, L>::operator()(std::stringstream &ss, R &r) const {
-    size_t count = 0;
-
-    for (; count < min; count++) {
-        if (!(*parser)(ss, r)) {
-            return false;
-        }
-    }
-    for (; count < max; count++) {
-        if (!(*parser)(ss, r)) {
-            return true;
-        }
-    }
-    return true;
-}
-
-template <class R, class L> bool repeat<R, L>::operator()(std::stringstream &ss) const {
-    size_t count = 0;
-
-    for (; count < min; count++) {
-        if (!(*parser)(ss)) {
-            return false;
-        }
-    }
-    for (; count < max; count++) {
-        if (!(*parser)(ss)) {
-            return true;
-        }
-    }
-    return true;
-}
-
 template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::stringstream &ss, RO &ro, L &l) const {
     RI ri;
     if (!(*parser)(ss, ri, l)) {
         return false;
     }
     ro = func(ri);
-    return true;
-}
-
-template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::stringstream &ss, RO &ro) const {
-    RI ri;
-    if (!(*parser)(ss, ri)) {
-        return false;
-    }
-    ro = func(ri);
-    return true;
-}
-
-template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::stringstream &ss) const {
-    RI ri;
-    if (!(*parser)(ss, ri)) {
-        return false;
-    }
-    RO ro = func(ri);
     return true;
 }
 

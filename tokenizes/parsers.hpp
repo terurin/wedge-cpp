@@ -80,8 +80,15 @@ public:
     constexpr const chars_t &get_chars() const { return chars; }
 
     virtual bool operator()(std::stringstream &, std::string &, empty_t &) const override;
-    virtual bool operator()(std::stringstream &, std::string &) const override;
-    virtual bool operator()(std::stringstream &) const override;
+    virtual bool operator()(std::stringstream &ss, std::string &r) const override {
+        empty_t l;
+        return (*this)(ss, r, l);
+    }
+    virtual bool operator()(std::stringstream &ss) const override {
+        std::string r;
+        empty_t l;
+        return (*this)(ss, r, l);
+    }
     static std::shared_ptr<atom> create(const chars_t &chars);
     static std::shared_ptr<atom> create(uint8_t c);
     static std::shared_ptr<atom> create(std::string_view sv);
@@ -118,8 +125,15 @@ public:
         assert(_min <= _max);
     }
     virtual bool operator()(std::stringstream &ss, R &r, L &l) const override;
-    virtual bool operator()(std::stringstream &ss, R &r) const override;
-    virtual bool operator()(std::stringstream &ss) const override;
+    virtual bool operator()(std::stringstream &ss, R &r) const override {
+        L l;
+        return (*this)(ss, r, l);
+    }
+    virtual bool operator()(std::stringstream &ss) const override {
+        R r;
+        L l;
+        return (*this)(ss, r, l);
+    }
 
     static std::shared_ptr<repeat<R, L>> create(base_ptr<R, L> &&p, size_t min = 0, size_t max = SIZE_MAX) {
         return std::make_shared<repeat<R, L>>(std::move(p), min, max);
@@ -174,8 +188,16 @@ public:
     mapper(const mapper &) = default;
     mapper(mapper &&) = default;
     virtual bool operator()(std::stringstream &ss, RO &ro, L &l) const override;
-    virtual bool operator()(std::stringstream &ss, RO &ro) const override;
-    virtual bool operator()(std::stringstream &ss) const override;
+    virtual bool operator()(std::stringstream &ss, RO &ro) const override {
+        L l;
+        return (*this)(ss, ro, l);
+    }
+
+    virtual bool operator()(std::stringstream &ss) const override {
+        RO ro;
+        L l;
+        return (*this)(ss, ro, l);
+    }
 
     static std::shared_ptr<mapper<RO, RI, L>> create(base_ptr<RI, L> &&parser, func_t func) {
         return std::make_shared<mapper<RO, RI, L>>(std::move(parser), func);
@@ -215,13 +237,17 @@ class tag : public base<std::string, empty_t> {
 public:
     tag(std::string_view sv) : str(sv) {}
     virtual bool operator()(std::stringstream &ss, std::string &r, empty_t &l) const override;
-    virtual bool operator()(std::stringstream &ss, std::string &r) const override;
-    virtual bool operator()(std::stringstream &ss) const override;
-
-    static std::shared_ptr<tag> create(std::string_view sv){
-        return std::make_shared<tag>(sv);
+    virtual bool operator()(std::stringstream &ss, std::string &r) const override {
+        empty_t l;
+        return (*this)(ss, r, l);
+    }
+    virtual bool operator()(std::stringstream &ss) const override {
+        std::string r;
+        empty_t l;
+        return (*this)(ss, r, l);
     }
 
+    static std::shared_ptr<tag> create(std::string_view sv) { return std::make_shared<tag>(sv); }
 };
 
 } // namespace tokenizes

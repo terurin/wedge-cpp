@@ -98,27 +98,6 @@ bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
     return true;
 }
 
-bool atom::operator()(std::stringstream &ss, std::string &s) const {
-    const int c = ss.peek();
-    if (c == -1 || !chars.test(c)) {
-        return false;
-    }
-
-    ss.ignore();
-    s.push_back(c);
-    return true;
-}
-
-bool atom::operator()(std::stringstream &ss) const {
-    const int c = ss.peek();
-    if (c == -1 || !chars.test(c)) {
-        return false;
-    }
-
-    ss.ignore();
-    return true;
-}
-
 atom_ptr operator|(const atom_ptr &a, const atom_ptr &b) {
     const auto c = a->get_chars() | b->get_chars();
     return atom::create(c);
@@ -165,32 +144,6 @@ bool tag::operator()(std::stringstream &ss, std::string &r, empty_t &l) const {
         }
     }
     r += str;
-    return true;
-}
-
-bool tag::operator()(std::stringstream &ss, std::string &r) const {
-
-    auto pos = ss.tellg();
-    for (const char c : str) {
-        const int input = ss.get();
-        if (input != -1 && input != c) {
-            ss.seekg(pos);
-            return false;
-        }
-    }
-    r += str;
-    return true;
-}
-
-bool tag::operator()(std::stringstream &ss) const {
-    auto pos = ss.tellg();
-    for (const char c : str) {
-        const int input = ss.get();
-        if (input != -1 && input != c) {
-            ss.seekg(pos);
-            return false;
-        }
-    }
     return true;
 }
 
