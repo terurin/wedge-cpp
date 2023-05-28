@@ -50,8 +50,7 @@ std::ostream &operator<<(std::ostream &os, const atom &s) {
     os << "{";
     bool use_comma = false;
     for (size_t i = 0; i < 256; i++) {
-        if (!chars.test(i))
-            continue;
+        if (!chars.test(i)) continue;
 
         if (use_comma) {
             os << "," << escaped_char((char)i);

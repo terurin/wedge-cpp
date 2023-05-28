@@ -27,16 +27,29 @@ struct empty_t {
     empty_t(empty_t &&) = default;
 };
 
-template <class R, class L> struct base;
-template <class R, class L> using base_ptr = std::shared_ptr<const base<R, L>>;
-template <class R, class L> using base_mut_ptr = std::shared_ptr<base<R, L>>;
+template <class R, class L>
+struct base;
 
-template <class R, class L> class repeat;
-template <class RO, class RI, class L> class mapper;
-template <class RO, class RI, class L> class mapper_error;
-template <class R, class L> class choose;
+template <class R, class L>
+using base_ptr = std::shared_ptr<const base<R, L>>;
 
-template <class R, class L> struct base : public std::enable_shared_from_this<base<R, L>> {
+template <class R, class L>
+using base_mut_ptr = std::shared_ptr<base<R, L>>;
+
+template <class R, class L>
+class repeat;
+
+template <class RO, class RI, class L>
+class mapper;
+
+template <class RO, class RI, class L>
+class mapper_error;
+
+template <class R, class L>
+class choose;
+
+template <class R, class L>
+struct base : public std::enable_shared_from_this<base<R, L>> {
     using right_t = R;
     using left_t = L;
     virtual bool operator()(std::stringstream &, right_t &r, left_t &) const = 0;
@@ -60,12 +73,14 @@ template <class R, class L> struct base : public std::enable_shared_from_this<ba
     std::shared_ptr<repeat<R, L>> many0() const { return repeat<R, L>::create(this->shared_from_this(), 0); }
 
     /* mapper */
-    template <std::invocable<R> F> auto map(F func) const {
+    template <std::invocable<R> F>
+    auto map(F func) const {
         R r;
         return mapper<typename std::invoke_result_t<F, R>, R, L>::create(this->shared_from_this(), func);
     }
 
-    template <std::invocable<L> F> auto map_err(F func) const {
+    template <std::invocable<L> F>
+    auto map_err(F func) const {
         L l;
         return mapper_error<R, typename std::invoke_result_t<F, L>, L>::create(this->shared_from_this(), func);
     }
@@ -124,7 +139,8 @@ static inline atom_ptr alpha = small | large;
 static inline atom_ptr digit = atom::create_range('0', '9');
 static inline atom_ptr alnum = small | large | digit;
 
-template <class R, class L> class repeat : public base<R, L> {
+template <class R, class L>
+class repeat : public base<R, L> {
     const size_t min, max;
     base_ptr<std::string, L> parser;
 
@@ -148,10 +164,13 @@ public:
     }
 };
 
-template <class R, class L> using repeat_mut_ptr = std::shared_ptr<const repeat<R, L>>;
-template <class R, class L> using repeat_ptr = std::shared_ptr<repeat<R, L>>;
+template <class R, class L>
+using repeat_mut_ptr = std::shared_ptr<const repeat<R, L>>;
+template <class R, class L>
+using repeat_ptr = std::shared_ptr<repeat<R, L>>;
 
-template <class R, class L> repeat_mut_ptr<R, L> repeat_n_m(base_ptr<R, L> &&p, size_t n, size_t m) {
+template <class R, class L>
+repeat_mut_ptr<R, L> repeat_n_m(base_ptr<R, L> &&p, size_t n, size_t m) {
     return repeat<R, L>::create(std::move(p), n, m);
 }
 
@@ -159,7 +178,8 @@ static inline repeat_mut_ptr<std::string, empty_t> repeat_n_m(base_ptr<std::stri
     return repeat<std::string, empty_t>::create(std::move(p), n, m);
 }
 
-template <class R, class L> repeat_mut_ptr<R, L> repeat_n(base_ptr<R, L> &&p, size_t n) {
+template <class R, class L>
+repeat_mut_ptr<R, L> repeat_n(base_ptr<R, L> &&p, size_t n) {
     return repeat<R, L>::create(std::move(p), n, n);
 }
 
@@ -167,7 +187,8 @@ static inline repeat_mut_ptr<std::string, empty_t> repeat_n(base_ptr<std::string
     return repeat<std::string, empty_t>::create(std::move(p), n, n);
 }
 
-template <class R, class L> repeat_mut_ptr<std::string, L> many1(base_ptr<R, L> &&p) {
+template <class R, class L>
+repeat_mut_ptr<std::string, L> many1(base_ptr<R, L> &&p) {
     return repeat<R, L>::create(std::move(p), 1);
 }
 
@@ -175,7 +196,8 @@ static inline repeat_mut_ptr<std::string, empty_t> many1(base_ptr<std::string, e
     return repeat<std::string, empty_t>::create(std::move(p), 1);
 }
 
-template <class R, class L> repeat_mut_ptr<std::string, L> many0(base_ptr<R, L> &&p, size_t n) {
+template <class R, class L>
+repeat_mut_ptr<std::string, L> many0(base_ptr<R, L> &&p, size_t n) {
     return repeat<R, L>::create(std::move(p));
 }
 
@@ -183,7 +205,8 @@ static inline repeat_mut_ptr<std::string, empty_t> many0(base_ptr<std::string, e
     return repeat<std::string, empty_t>::create(std::move(p));
 }
 
-template <class RO, class RI, class L> class mapper : public base<RO, L> {
+template <class RO, class RI, class L>
+class mapper : public base<RO, L> {
 public:
     using func_t = std::function<RO(const RI &)>;
 
@@ -212,15 +235,18 @@ public:
     }
 };
 
-template <class RO, class RI, class L> using mapper_ptr = std::shared_ptr<const mapper<RO, RI, L>>;
-template <class RO, class RI, class L> using mapper_mut_ptr = std::shared_ptr<mapper<RO, RI, L>>;
+template <class RO, class RI, class L>
+using mapper_ptr = std::shared_ptr<const mapper<RO, RI, L>>;
+template <class RO, class RI, class L>
+using mapper_mut_ptr = std::shared_ptr<mapper<RO, RI, L>>;
 
 template <class RO, class RI, class L>
 mapper_mut_ptr<RO, RI, L> map(base_ptr<RI, L> base, std::function<RO(const RI &)> func) {
     return mapper<RO, RI, L>::create(base, func);
 }
 
-template <class R, class LO, class LI> class mapper_error : public base<R, LO> {
+template <class R, class LO, class LI>
+class mapper_error : public base<R, LO> {
 public:
     using func_t = std::function<LO(const LI &)>;
 
@@ -259,7 +285,8 @@ public:
     static std::shared_ptr<tag> create(std::string_view sv) { return std::make_shared<tag>(sv); }
 };
 
-template <class R, class L> class choose : public base<R, L> {
+template <class R, class L>
+class choose : public base<R, L> {
     std::vector<base_ptr<R, L>> parsers;
 
 public:
@@ -287,11 +314,15 @@ public:
     };
 };
 
-template <class R, class L> auto list(base_ptr<R, L> &&parser) { return choose<R, L>::create(std::move(parser)); }
-template <class R, class L> auto list(std::vector<base_ptr<R, L>> &&parser) {
+template <class R, class L>
+auto list(base_ptr<R, L> &&parser) {
     return choose<R, L>::create(std::move(parser));
 }
-//template <class R, class L> auto list(base_ptr<R, L> &&parser) { return choose<R, L>::create(std::move(parser)); }
+template <class R, class L>
+auto list(std::vector<base_ptr<R, L>> &&parser) {
+    return choose<R, L>::create(std::move(parser));
+}
+// template <class R, class L> auto list(base_ptr<R, L> &&parser) { return choose<R, L>::create(std::move(parser)); }
 
 } // namespace tokenizes
 #include "parsers.cxx"

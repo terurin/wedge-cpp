@@ -142,8 +142,8 @@ TEST(tag, tag) {
 }
 
 TEST(choose, choose) {
-    //const auto parser = tag::create("abc")->or_parser(tag::create("xyz"));
-const auto parser = choose<std::string, empty_t>::create({tag::create("abc"),tag::create("xyz")});
+    // const auto parser = tag::create("abc")->or_parser(tag::create("xyz"));
+    const auto parser = choose<std::string, empty_t>::create({tag::create("abc"), tag::create("xyz")});
 
     stringstream ss;
     string r;

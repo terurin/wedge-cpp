@@ -3,18 +3,21 @@
 
 namespace tokenizes {
 
-template <class R, class L> bool base<R, L>::operator()(std::stringstream &ss, R &r) const {
+template <class R, class L>
+bool base<R, L>::operator()(std::stringstream &ss, R &r) const {
     L l;
     return (*this)(ss, r, l);
 }
 
-template <class R, class L> bool base<R, L>::operator()(std::stringstream &ss) const {
+template <class R, class L>
+bool base<R, L>::operator()(std::stringstream &ss) const {
     R r;
     L l;
     return (*this)(ss, r, l);
 }
 
-template <class R, class L> bool repeat<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
+template <class R, class L>
+bool repeat<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
     size_t count = 0;
 
     for (; count < min; count++) {
@@ -30,7 +33,8 @@ template <class R, class L> bool repeat<R, L>::operator()(std::stringstream &ss,
     return true;
 }
 
-template <class RO, class RI, class L> bool mapper<RO, RI, L>::operator()(std::stringstream &ss, RO &ro, L &l) const {
+template <class RO, class RI, class L>
+bool mapper<RO, RI, L>::operator()(std::stringstream &ss, RO &ro, L &l) const {
     RI ri;
     if (!(*parser)(ss, ri, l)) {
         return false;
@@ -51,7 +55,8 @@ bool mapper_error<R, LO, LI>::operator()(std::stringstream &ss, R &r, LO &lo) co
     return false;
 }
 
-template <class R, class L> bool choose<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
+template <class R, class L>
+bool choose<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
     // store
     const auto pos = ss.tellg();
     for (const auto parser : parsers) {
@@ -59,7 +64,7 @@ template <class R, class L> bool choose<R, L>::operator()(std::stringstream &ss,
             return true;
         }
         // restore
-        if (pos != ss.tellg()){
+        if (pos != ss.tellg()) {
             throw std::runtime_error("overrun, use attempt");
         }
     }
