@@ -290,7 +290,6 @@ class choose : public base<R, L> {
     std::vector<base_ptr<R, L>> parsers;
 
 public:
-    choose(base_ptr<R, L> &&_parser) : parsers({_parser}){};
     choose(std::vector<base_ptr<R, L>> &&_parsers) : parsers(_parsers){};
     choose<R, L> &add(base_ptr<R, L> &&parser) { return parsers.emplace(parser), *this; }
 
@@ -305,24 +304,32 @@ public:
         return (*this)(ss, r, l);
     }
 
-    static std::shared_ptr<choose<R, L>> create(base_ptr<R, L> &&parser) {
-        return std::make_shared<choose<R, L>>(std::move(parser));
-    };
-
     static std::shared_ptr<choose<R, L>> create(std::vector<base_ptr<R, L>> &&parsers) {
         return std::make_shared<choose<R, L>>(std::move(parsers));
     };
 };
 
-template <class R, class L>
-auto list(base_ptr<R, L> &&parser) {
-    return choose<R, L>::create(std::move(parser));
+template <typename P>
+concept base_both = requires(P) {
+    typename P::right_t;
+    typename P::left_t;
+};
+
+template <base_both P>
+auto list(std::shared_ptr<const P>  &&parser) {
+    return choose<typename P::right_t, typename P::left_t>::create(std::move(parser));
 }
+
+template <class R, class L>
+auto list(base_ptr<R, L> &&parsers...) {
+    std::vector<base_ptr<R, L>> ps({parsers});
+    return choose<R, L>::create({std::move(ps)});
+}
+
 template <class R, class L>
 auto list(std::vector<base_ptr<R, L>> &&parser) {
     return choose<R, L>::create(std::move(parser));
 }
-// template <class R, class L> auto list(base_ptr<R, L> &&parser) { return choose<R, L>::create(std::move(parser)); }
 
 } // namespace tokenizes
 #include "parsers.cxx"
