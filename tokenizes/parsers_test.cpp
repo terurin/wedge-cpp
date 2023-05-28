@@ -132,11 +132,19 @@ TEST(tag, tag) {
     ss.clear();
     ss.str("xyz");
     EXPECT_FALSE((*parser)(ss, r));
-    EXPECT_EQ(r,"");
+    EXPECT_EQ(r, "");
 
     r.clear();
     ss.clear();
     ss.str("abz");
     EXPECT_FALSE((*parser)(ss, r));
-    EXPECT_EQ(r,"");
+    EXPECT_EQ(r, "");
+}
+
+TEST(choose, choose) {
+    //const auto parser = tag::create("abc")->or_parser(tag::create("xyz"));
+const auto parser = choose<std::string, empty_t>::create({tag::create("abc"),tag::create("xyz")});
+
+    stringstream ss;
+    string r;
 }

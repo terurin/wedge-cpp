@@ -51,6 +51,19 @@ bool mapper_error<R, LO, LI>::operator()(std::stringstream &ss, R &r, LO &lo) co
     return false;
 }
 
-template <class R, class L> bool choose<R, L>::operator()(std::stringstream &ss, R &r, L &l) const { return false; }
+template <class R, class L> bool choose<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
+    // store
+    const auto pos = ss.tellg();
+    for (const auto parser : parsers) {
+        if ((*parser)(ss, r, l)) {
+            return true;
+        }
+        // restore
+        if (pos != ss.tellg()){
+            throw std::runtime_error("overrun, use attempt");
+        }
+    }
+    return false;
+}
 
 } // namespace tokenizes

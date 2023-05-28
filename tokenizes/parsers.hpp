@@ -26,9 +26,15 @@ struct empty_t {
     empty_t(const empty_t &) = default;
     empty_t(empty_t &&) = default;
 };
+
+template <class R, class L> struct base;
+template <class R, class L> using base_ptr = std::shared_ptr<const base<R, L>>;
+template <class R, class L> using base_mut_ptr = std::shared_ptr<base<R, L>>;
+
 template <class R, class L> class repeat;
 template <class RO, class RI, class L> class mapper;
 template <class RO, class RI, class L> class mapper_error;
+template <class R, class L> class choose;
 
 template <class R, class L> struct base : public std::enable_shared_from_this<base<R, L>> {
     using right_t = R;
@@ -63,10 +69,12 @@ template <class R, class L> struct base : public std::enable_shared_from_this<ba
         L l;
         return mapper_error<R, typename std::invoke_result_t<F, L>, L>::create(this->shared_from_this(), func);
     }
-};
 
-template <class R, class L> using base_ptr = std::shared_ptr<const base<R, L>>;
-template <class R, class L> using base_mut_ptr = std::shared_ptr<base<R, L>>;
+    // choose
+    virtual std::shared_ptr<choose<R, L>> or_parser(base_ptr<R, L> &&insert) {
+        return choose<R, L>::create({this->shared_from_this(), insert});
+    }
+};
 
 class atom : public base<std::string, empty_t> {
     using chars_t = std::bitset<256>;
@@ -252,11 +260,12 @@ public:
 };
 
 template <class R, class L> class choose : public base<R, L> {
-    std::vector<const base_ptr<R, L>> list;
+    std::vector<base_ptr<R, L>> parsers;
 
 public:
-    choose(std::vector<const base_ptr<R, L>> &&_list) : list(_list){};
-    choose<R, L> &add(base_ptr<R, L> &&item) { return list.push_back(item), *this; }
+    choose(base_ptr<R, L> &&_parser) : parsers({_parser}){};
+    choose(std::vector<base_ptr<R, L>> &&_parsers) : parsers(_parsers){};
+    choose<R, L> &add(base_ptr<R, L> &&parser) { return parsers.emplace(parser), *this; }
 
     virtual bool operator()(std::stringstream &ss, R &r, L &l) const override;
     virtual bool operator()(std::stringstream &ss, R &r) const override {
@@ -269,10 +278,20 @@ public:
         return (*this)(ss, r, l);
     }
 
-    static std::shared_ptr<choose<R, L>> create(std::vector<base_ptr<R, L>> &&list) {
-        return std::make_shared<choose<R, L>>(std::move(list));
+    static std::shared_ptr<choose<R, L>> create(base_ptr<R, L> &&parser) {
+        return std::make_shared<choose<R, L>>(std::move(parser));
+    };
+
+    static std::shared_ptr<choose<R, L>> create(std::vector<base_ptr<R, L>> &&parsers) {
+        return std::make_shared<choose<R, L>>(std::move(parsers));
     };
 };
+
+template <class R, class L> auto list(base_ptr<R, L> &&parser) { return choose<R, L>::create(std::move(parser)); }
+template <class R, class L> auto list(std::vector<base_ptr<R, L>> &&parser) {
+    return choose<R, L>::create(std::move(parser));
+}
+//template <class R, class L> auto list(base_ptr<R, L> &&parser) { return choose<R, L>::create(std::move(parser)); }
 
 } // namespace tokenizes
 #include "parsers.cxx"
