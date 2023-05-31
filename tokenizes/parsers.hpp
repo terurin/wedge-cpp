@@ -338,5 +338,27 @@ auto operator+(std::shared_ptr<BR> &&r, std::shared_ptr<BL> &&l) {
     return r->or_parser(l);
 }
 
+template <class R, class L>
+class sequence : public base<R, L> {
+    std::vector<base_ptr<R, L>> items;
+
+public:
+    sequence(std::vector<base_ptr<R, L>> &&_items) : items(_items) {}
+    virtual bool operator()(std::stringstream &ss, R &r, L &l) const override;
+    virtual bool operator()(std::stringstream &ss, R &r) const override {
+        L l;
+        return (*this)(ss, r, l);
+    }
+    virtual bool operator()(std::stringstream &ss) const override {
+        R r;
+        L l;
+        return (*this)(ss, r, l);
+    }
+
+    static std::shared_ptr<sequence<R, L>> create(std::vector<base_ptr<R, L>> &&items) {
+        return std::make_shared<sequence<R, L>>(std::move(items));
+    }
+};
+
 } // namespace tokenizes
 #include "parsers.cxx"

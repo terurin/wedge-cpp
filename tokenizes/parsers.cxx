@@ -71,4 +71,9 @@ bool choose<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
     return false;
 }
 
+template <class R, class L>
+bool sequence<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
+    return false;//TODO: implement
+}
+
 } // namespace tokenizes
