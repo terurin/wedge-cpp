@@ -55,7 +55,6 @@ struct base : public std::enable_shared_from_this<base<R, L>> {
     using left_t = L;
     virtual bool operator()(std::stringstream &, right_t &r, left_t &) const = 0;
     virtual bool operator()(std::stringstream &ss, right_t &r) const;
-    virtual bool operator()(std::stringstream &ss) const;
     operator std::shared_ptr<base>() { return this->shared_from_this(); }
     operator std::shared_ptr<const base>() const { return this->shared_from_this(); }
     std::shared_ptr<base> as_base() { return this->shared_from_this(); }
@@ -108,11 +107,6 @@ public:
         empty_t l;
         return (*this)(ss, r, l);
     }
-    virtual bool operator()(std::stringstream &ss) const override {
-        std::string r;
-        empty_t l;
-        return (*this)(ss, r, l);
-    }
     static std::shared_ptr<atom> create(const chars_t &chars);
     static std::shared_ptr<atom> create(uint8_t c);
     static std::shared_ptr<atom> create(std::string_view sv);
@@ -149,11 +143,6 @@ public:
     }
     virtual bool operator()(std::stringstream &ss, R &r, L &l) const override;
     virtual bool operator()(std::stringstream &ss, R &r) const override {
-        L l;
-        return (*this)(ss, r, l);
-    }
-    virtual bool operator()(std::stringstream &ss) const override {
-        R r;
         L l;
         return (*this)(ss, r, l);
     }
@@ -223,12 +212,6 @@ public:
         return (*this)(ss, ro, l);
     }
 
-    virtual bool operator()(std::stringstream &ss) const override {
-        RO ro;
-        L l;
-        return (*this)(ss, ro, l);
-    }
-
     static std::shared_ptr<mapper<RO, RI, L>> create(base_ptr<RI, L> &&parser, func_t func) {
         return std::make_shared<mapper<RO, RI, L>>(std::move(parser), func);
     }
@@ -275,11 +258,6 @@ public:
         empty_t l;
         return (*this)(ss, r, l);
     }
-    virtual bool operator()(std::stringstream &ss) const override {
-        std::string r;
-        empty_t l;
-        return (*this)(ss, r, l);
-    }
 
     static std::shared_ptr<tag> create(std::string_view sv) { return std::make_shared<tag>(sv); }
 };
@@ -295,11 +273,7 @@ public:
         L l;
         return (*this)(ss, r, l);
     }
-    virtual bool operator()(std::stringstream &ss) const override {
-        R r;
-        L l;
-        return (*this)(ss, r, l);
-    }
+    
     virtual std::shared_ptr<choose<R, L>> or_parser(base_ptr<R, L> &&insert) override {
         return choose<R, L>::create({this->shared_from_this(), insert});
     }
