@@ -97,38 +97,28 @@ bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
     return true;
 }
 
-atom_ptr operator|(const atom_ptr &a, const atom_ptr &b) {
+atom_ptr operator+(const atom_ptr &a, const atom_ptr &b) {
     const auto c = a->get_chars() | b->get_chars();
     return atom::create(c);
 }
 
-atom_ptr operator&(const atom_ptr &a, const atom_ptr &b) {
-    const auto c = a->get_chars() & b->get_chars();
+atom_ptr operator-(const atom_ptr &a, const atom_ptr &b) {
+    const auto c = a->get_chars() & ~b->get_chars();
     return atom::create(c);
 }
 
-atom_ptr operator^(const atom_ptr &a, const atom_ptr &b) {
-    const auto c = a->get_chars() ^ b->get_chars();
-    return atom::create(c);
-}
-
-atom_ptr operator~(const atom_ptr &a) {
+atom_ptr operator-(const atom_ptr &a) {
     const auto c = ~a->get_chars();
     return atom::create(c);
 }
 
-atom_mut_ptr &operator|=(atom_mut_ptr &a, const atom_ptr &b) {
+atom_mut_ptr &operator+=(atom_mut_ptr &a, const atom_ptr &b) {
     a->get_chars() |= b->get_chars();
     return a;
 }
 
-atom_mut_ptr &operator&=(atom_mut_ptr &a, const atom_ptr &b) {
-    a->get_chars() &= b->get_chars();
-    return a;
-}
-
-atom_mut_ptr &operator^=(atom_mut_ptr &a, const atom_ptr &b) {
-    a->get_chars() ^= b->get_chars();
+atom_mut_ptr &operator-=(atom_mut_ptr &a, const atom_ptr &b) {
+    a->get_chars() &= ~b->get_chars();
     return a;
 }
 

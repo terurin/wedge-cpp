@@ -142,7 +142,7 @@ TEST(tag, tag) {
 }
 
 TEST(choose, choose) {
-    const auto parser = tag::create("abc") | tag::create("xyz");
+    const auto parser = tag::create("abc") + tag::create("xyz");
 
     stringstream ss;
     string r;

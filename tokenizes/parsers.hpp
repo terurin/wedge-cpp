@@ -123,22 +123,20 @@ using atom_ptr = std::shared_ptr<const atom>;
 using atom_mut_ptr = std::shared_ptr<atom>;
 
 std::ostream &operator<<(std::ostream &, const atom &);
-atom_ptr operator|(const atom_ptr &a, const atom_ptr &b);
-atom_ptr operator&(const atom_ptr &a, const atom_ptr &b);
-atom_ptr operator^(const atom_ptr &a, const atom_ptr &b);
-atom_ptr operator~(const atom_ptr &a);
+atom_ptr operator+(const atom_ptr &a, const atom_ptr &b);
+atom_ptr operator-(const atom_ptr &a, const atom_ptr &b);
+atom_ptr operator-(const atom_ptr &a);
 
-atom_mut_ptr &operator|=(atom_mut_ptr &a, const atom_ptr &b);
-atom_mut_ptr &operator&=(atom_mut_ptr &a, const atom_ptr &b);
-atom_mut_ptr &operator^=(atom_mut_ptr &a, const atom_ptr &b);
+atom_mut_ptr &operator+=(atom_mut_ptr &a, const atom_ptr &b);
+atom_mut_ptr &operator-=(atom_mut_ptr &a, const atom_ptr &b);
 
 static inline atom_ptr sign = atom::create("+-");
 static inline atom_ptr dot = atom::create(".");
 static inline atom_ptr small = atom::create_range('a', 'z');
 static inline atom_ptr large = atom::create_range('A', 'Z');
-static inline atom_ptr alpha = small | large;
+static inline atom_ptr alpha = small + large;
 static inline atom_ptr digit = atom::create_range('0', '9');
-static inline atom_ptr alnum = small | large | digit;
+static inline atom_ptr alnum = small + large + digit;
 
 template <class R, class L>
 class repeat : public base<R, L> {
@@ -305,7 +303,7 @@ public:
     virtual std::shared_ptr<choose<R, L>> or_parser(base_ptr<R, L> &&insert) override {
         return choose<R, L>::create({this->shared_from_this(), insert});
     }
-    
+
     static std::shared_ptr<choose<R, L>> create(std::vector<base_ptr<R, L>> &&parsers) {
         return std::make_shared<choose<R, L>>(std::move(parsers));
     };
@@ -336,7 +334,7 @@ auto list(std::vector<std::shared_ptr<B>> &&parsers) {
 template <base_both BR, base_both BL>
     requires std::same_as<typename BR::right_t, typename BL::right_t> &&
              std::same_as<typename BR::left_t, typename BL::left_t>
-auto operator|(std::shared_ptr<BR> &&r, std::shared_ptr<BL> &&l) {
+auto operator+(std::shared_ptr<BR> &&r, std::shared_ptr<BL> &&l) {
     return r->or_parser(l);
 }
 
