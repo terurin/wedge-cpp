@@ -3,57 +3,39 @@
 
 namespace tokenizes {
 
-template <class R, class L>
-bool base<R, L>::operator()(std::stringstream &ss, R &r) const {
-    L l;
-    return (*this)(ss, r, l);
-}
-
-template <class R, class L>
-bool repeat<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
+template <class R>
+bool repeat<R>::operator()(std::stringstream &ss, R &r) const {
     size_t count = 0;
 
     for (; count < min; count++) {
-        if (!(*parser)(ss, r, l)) {
+        if (!(*parser)(ss, r)) {
             return false;
         }
     }
     for (; count < max; count++) {
-        if (!(*parser)(ss, r, l)) {
+        if (!(*parser)(ss, r)) {
             return true;
         }
     }
     return true;
 }
 
-template <class RO, class RI, class L>
-bool mapper<RO, RI, L>::operator()(std::stringstream &ss, RO &ro, L &l) const {
+template <class RO, class RI>
+bool mapper<RO, RI>::operator()(std::stringstream &ss, RO &ro) const {
     RI ri;
-    if (!(*parser)(ss, ri, l)) {
+    if (!(*parser)(ss, ri)) {
         return false;
     }
     ro = func(ri);
     return true;
 }
 
-template <class R, class LO, class LI>
-bool mapper_error<R, LO, LI>::operator()(std::stringstream &ss, R &r, LO &lo) const {
-    LI li;
-    if ((*parser)(ss, r, li)) {
-        return true;
-    }
-
-    lo = func(li);
-
-    return false;
-}
-
-template <class R, class L>
-bool choose<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
+template <class R>
+bool choose<R>::operator()(std::stringstream &ss, R &r) const {
     // store
     const auto pos = ss.tellg();
     for (const auto parser : parsers) {
-        if ((*parser)(ss, r, l)) {
+        if ((*parser)(ss, r)) {
             return true;
         }
         // restore
@@ -64,8 +46,8 @@ bool choose<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
     return false;
 }
 
-template <class R, class L>
-bool sequence<R, L>::operator()(std::stringstream &ss, R &r, L &l) const {
+template <class R>
+bool sequence<R>::operator()(std::stringstream &ss, R &r) const {
     return false;//TODO: implement
 }
 

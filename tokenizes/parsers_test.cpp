@@ -10,12 +10,11 @@ TEST(atom, char) {
 
     stringstream ss;
     std::string s;
-    empty_t empty;
     ss << "a";
-    EXPECT_TRUE((*parser)(ss, s, empty));
+    EXPECT_TRUE((*parser)(ss, s));
 
     ss << "b";
-    EXPECT_FALSE((*parser)(ss, s, empty));
+    EXPECT_FALSE((*parser)(ss, s));
 }
 
 TEST(atom, list) {
@@ -23,19 +22,18 @@ TEST(atom, list) {
 
     stringstream ss;
     std::string s;
-    empty_t empty;
 
     ss << "a";
-    EXPECT_TRUE((*parser)(ss, s, empty));
+    EXPECT_TRUE((*parser)(ss, s));
 
     ss << "b";
-    EXPECT_TRUE((*parser)(ss, s, empty));
+    EXPECT_TRUE((*parser)(ss, s));
 
     ss << "c";
-    EXPECT_TRUE((*parser)(ss, s, empty));
+    EXPECT_TRUE((*parser)(ss, s));
 
     ss << "d";
-    EXPECT_FALSE((*parser)(ss, s, empty));
+    EXPECT_FALSE((*parser)(ss, s));
 }
 
 TEST(atom, range) {
@@ -43,7 +41,6 @@ TEST(atom, range) {
     const auto parser = atom::create_range('2', '8');
     stringstream ss;
     std::string s;
-    empty_t empty;
     ss << "2";
     EXPECT_TRUE((*parser)(ss, s));
     ss << "8";
@@ -97,25 +94,6 @@ TEST(mapper, mapper) {
     ss.clear();
     ss.str("0");
     EXPECT_FALSE((*parser)(ss, out));
-}
-
-TEST(error_mapper, error_mapper) {
-
-    const auto parser = atom::create("1")->map_err([](const empty_t &in) -> int { return 1; });
-
-    stringstream ss;
-    string r;
-    int l;
-
-    // fail
-    l = 0;
-    ss.str("0");
-    EXPECT_FALSE((*parser)(ss, r, l) && l == 1);
-
-    // success
-    l = 0;
-    ss.str("1");
-    EXPECT_TRUE((*parser)(ss, r, l));
 }
 
 TEST(tag, tag) {

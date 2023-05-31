@@ -86,7 +86,7 @@ std::shared_ptr<atom> atom::create_range(uint8_t first, uint8_t last) {
     return std::make_shared<atom>(chars);
 }
 
-bool atom::operator()(std::stringstream &ss, std::string &s, empty_t &) const {
+bool atom::operator()(std::stringstream &ss, std::string &s) const {
     const int c = ss.peek();
     if (c == -1 || !chars.test(c)) {
         return false;
@@ -122,7 +122,7 @@ atom_mut_ptr &operator-=(atom_mut_ptr &a, const atom_ptr &b) {
     return a;
 }
 
-bool tag::operator()(std::stringstream &ss, std::string &r, empty_t &l) const {
+bool tag::operator()(std::stringstream &ss, std::string &r) const {
 
     auto pos = ss.tellg();
     for (const char c : str) {
