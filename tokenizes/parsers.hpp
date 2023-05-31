@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <span>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -291,8 +292,6 @@ class choose : public base<R, L> {
 
 public:
     choose(std::vector<base_ptr<R, L>> &&_parsers) : parsers(_parsers){};
-    choose<R, L> &add(base_ptr<R, L> &&parser) { return parsers.emplace(parser), *this; }
-
     virtual bool operator()(std::stringstream &ss, R &r, L &l) const override;
     virtual bool operator()(std::stringstream &ss, R &r) const override {
         L l;
@@ -303,7 +302,10 @@ public:
         L l;
         return (*this)(ss, r, l);
     }
-
+    virtual std::shared_ptr<choose<R, L>> or_parser(base_ptr<R, L> &&insert) override {
+        return choose<R, L>::create({this->shared_from_this(), insert});
+    }
+    
     static std::shared_ptr<choose<R, L>> create(std::vector<base_ptr<R, L>> &&parsers) {
         return std::make_shared<choose<R, L>>(std::move(parsers));
     };
@@ -316,7 +318,7 @@ concept base_both = requires(P) {
 };
 
 template <base_both P>
-auto list(std::shared_ptr<const P>  &&parser) {
+auto list(std::shared_ptr<const P> &&parser) {
     return choose<typename P::right_t, typename P::left_t>::create(std::move(parser));
 }
 
@@ -326,9 +328,16 @@ auto list(base_ptr<R, L> &&parsers...) {
     return choose<R, L>::create({std::move(ps)});
 }
 
-template <class R, class L>
-auto list(std::vector<base_ptr<R, L>> &&parser) {
-    return choose<R, L>::create(std::move(parser));
+template <base_both B>
+auto list(std::vector<std::shared_ptr<B>> &&parsers) {
+    return choose<typename B::right_t, typename B::left_t>::create(std::move(parsers));
+}
+
+template <base_both BR, base_both BL>
+    requires std::same_as<typename BR::right_t, typename BL::right_t> &&
+             std::same_as<typename BR::left_t, typename BL::left_t>
+auto operator|(std::shared_ptr<BR> &&r, std::shared_ptr<BL> &&l) {
+    return r->or_parser(l);
 }
 
 } // namespace tokenizes

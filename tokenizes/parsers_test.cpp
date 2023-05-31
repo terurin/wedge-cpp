@@ -142,9 +142,25 @@ TEST(tag, tag) {
 }
 
 TEST(choose, choose) {
-    // const auto parser = tag::create("abc")->or_parser(tag::create("xyz"));
-    // const auto parser = choose<std::string, empty_t>::create({tag::create("abc"), tag::create("xyz")});
-    const auto parser = list<std::string, empty_t>(tag::create("abc"), tag::create("xyz"));
+    const auto parser = tag::create("abc") | tag::create("xyz");
+
     stringstream ss;
     string r;
+
+    // success(right)
+    ss.str("abc");
+    EXPECT_TRUE((*parser)(ss, r));
+    EXPECT_EQ(r, "abc");
+
+    // success(left)
+    r.clear();
+    ss.str("xyz");
+    EXPECT_TRUE((*parser)(ss, r));
+    EXPECT_EQ(r, "xyz");
+
+    // fail
+    r.clear();
+    ss.str("ijk");
+    EXPECT_FALSE((*parser)(ss, r));
+    EXPECT_EQ(r, "");
 }
