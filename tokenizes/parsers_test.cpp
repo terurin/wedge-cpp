@@ -120,8 +120,10 @@ TEST(tag, tag) {
 }
 
 TEST(choose, choose) {
-    const auto parser = make_shell(tag::create("abc")).or_parser(tag::create("xyz"));
-
+    // const auto parser = make_shell(tag::create("abc")).or_parser(tag::create("xyz"));
+    const auto parser = choose<std::string>::create(
+        {tag::create("abc"), tag::create("xyz")}
+        );
     stringstream ss;
     string r;
 

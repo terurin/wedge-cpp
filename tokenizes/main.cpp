@@ -1,4 +1,5 @@
 #include "parsers.hpp"
+#include "shell.hpp"
 #include <iostream>
 #include <regex>
 #include <sstream>

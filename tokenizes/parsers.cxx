@@ -3,8 +3,8 @@
 
 namespace tokenizes {
 
-template <class R>
-bool repeat<R>::operator()(std::stringstream &ss, R &r) const {
+template <class O>
+bool repeat<O>::operator()(std::stringstream &ss, O &r) const {
     size_t count = 0;
 
     for (; count < min; count++) {
@@ -30,8 +30,8 @@ bool mapper<RO, RI>::operator()(std::stringstream &ss, RO &ro) const {
     return true;
 }
 
-template <class R>
-bool choose<R>::operator()(std::stringstream &ss, R &r) const {
+template <class O>
+bool choose<O>::operator()(std::stringstream &ss, O &r) const {
     // store
     const auto pos = ss.tellg();
     for (const auto parser : parsers) {
@@ -46,8 +46,8 @@ bool choose<R>::operator()(std::stringstream &ss, R &r) const {
     return false;
 }
 
-template <class R>
-bool sequence<R>::operator()(std::stringstream &ss, R &r) const {
+template <class O>
+bool sequence<O>::operator()(std::stringstream &ss, O &r) const {
     return false;//TODO: implement
 }
 
