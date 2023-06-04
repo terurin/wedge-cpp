@@ -56,6 +56,32 @@ struct base : public std::enable_shared_from_this<base<R>> {
     std::shared_ptr<const base> as_base() const { return this->shared_from_this(); }
 
     /* repeat */
+    // auto repeat_n_m(size_t n, size_t m) const { return repeat<R>::create(this->shared_from_this(), n, m); }
+    // auto repeat_n(size_t n) const { return repeat<R>::create(this->shared_from_this(), n, n); }
+    // auto many1() const { return repeat<R>::create(this->shared_from_this(), 1); }
+    // auto many0() const { return repeat<R>::create(this->shared_from_this(), 0); }
+
+    // /* mapper */
+    // template <std::invocable<R> F>
+    // auto map(F func) const {
+    //     R r;
+    //     return mapper<typename std::invoke_result_t<F, R>, R>::create(this->shared_from_this(), func);
+    // }
+
+    // // choose
+    // virtual std::shared_ptr<choose<R>> or_parser(base_ptr<R> &&insert) {
+    //     return choose<R>::create({this->shared_from_this(), insert});
+    // }
+};
+
+template <class R>
+class shell {
+    using right_t = R;
+    std::shared_ptr<base<R>> inner;
+
+public:
+    shell(std::shared_ptr<base<R>> &&_inner) : inner(_inner) {}
+    virtual bool operator()(std::stringstream &ss, right_t &r) { return (*inner)(ss, r); }
     auto repeat_n_m(size_t n, size_t m) const { return repeat<R>::create(this->shared_from_this(), n, m); }
     auto repeat_n(size_t n) const { return repeat<R>::create(this->shared_from_this(), n, n); }
     auto many1() const { return repeat<R>::create(this->shared_from_this(), 1); }
@@ -65,14 +91,17 @@ struct base : public std::enable_shared_from_this<base<R>> {
     template <std::invocable<R> F>
     auto map(F func) const {
         R r;
-        return mapper<typename std::invoke_result_t<F, R>, R>::create(this->shared_from_this(), func);
+        return mapper<typename std::invoke_result_t<F, R>, R>::create(inner, func);
     }
 
     // choose
-    virtual std::shared_ptr<choose<R>> or_parser(base_ptr<R> &&insert) {
-        return choose<R>::create({this->shared_from_this(), insert});
-    }
+    virtual std::shared_ptr<choose<R>> or_parser(base_ptr<R> &&insert) { return choose<R>::create({inner, insert}); }
 };
+
+template <class B>
+auto make_shell(std::shared_ptr<B> &&b) {
+    return shell<typename B::right_t>(std::move(b));
+}
 
 class atom : public base<std::string> {
     using chars_t = std::bitset<256>;
@@ -192,9 +221,9 @@ using mapper_ptr = std::shared_ptr<const mapper<RO, RI>>;
 template <class RO, class RI>
 using mapper_mut_ptr = std::shared_ptr<mapper<RO, RI>>;
 
-template <class RO, class RI>
-mapper_mut_ptr<RO, RI> map(base_ptr<RI> base, std::function<RO(const RI &)> func) {
-    return mapper<RO, RI>::create(base, func);
+template <class RI, class F>
+auto map(base_ptr<RI> base, F func) {
+    return mapper<typename std::invoke_result_t<F, RI>, RI>::create(base, func);
 }
 
 class tag : public base<std::string> {
@@ -216,9 +245,9 @@ public:
     choose(std::vector<base_ptr<R>> &&_parsers) : parsers(_parsers){};
     virtual bool operator()(std::stringstream &ss, R &r) const override;
 
-    virtual std::shared_ptr<choose<R>> or_parser(base_ptr<R> &&insert) override {
-        return choose<R>::create({this->shared_from_this(), insert});
-    }
+    // virtual std::shared_ptr<choose<R>> or_parser(base_ptr<R> &&insert) override {
+    //     return choose<R>::create({this->shared_from_this(), insert});
+    // }
 
     static std::shared_ptr<choose<R>> create(std::vector<base_ptr<R>> &&parsers) {
         return std::make_shared<choose<R>>(std::move(parsers));
@@ -242,12 +271,6 @@ auto list(base_ptr<R> &&parsers...) {
 template <base_both B>
 auto list(std::vector<std::shared_ptr<B>> &&parsers) {
     return choose<typename B::right_t>::create(std::move(parsers));
-}
-
-template <base_both BR, base_both BL>
-    requires std::same_as<typename BR::right_t, typename BL::right_t>
-auto operator+(std::shared_ptr<BR> &&r, std::shared_ptr<BL> &&l) {
-    return r->or_parser(l);
 }
 
 template <class R>

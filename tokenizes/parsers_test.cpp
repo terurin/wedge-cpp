@@ -82,7 +82,7 @@ TEST(repeat, repeat) {
 }
 
 TEST(mapper, mapper) {
-    const auto parser = atom::create("1")->map([](const std::string &in) { return 1; });
+    const auto parser = mapper<int, std::string>::create(atom::create("1"), [](const std::string &in) { return 1; });
     stringstream ss;
     int out;
 
@@ -120,7 +120,7 @@ TEST(tag, tag) {
 }
 
 TEST(choose, choose) {
-    const auto parser = tag::create("abc") + tag::create("xyz");
+    const auto parser = make_shell(tag::create("abc")).or_parser(tag::create("xyz"));
 
     stringstream ss;
     string r;
