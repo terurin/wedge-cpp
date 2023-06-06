@@ -14,32 +14,45 @@
 #include <type_traits>
 #include <vector>
 
+#include "mappers.hpp"
 #include "primitive.hpp"
 
 namespace tokenizes {
 
-template <class O>
+template <class T>
 class shell {
 public:
-    using output = O;
-    using func_t = std::function<std::optional<O>(std::istream &)>;
+    using output = T;
+    using parser_t = std::function<std::optional<T>(std::istream &)>;
 
 private:
-    func_t func;
+    parser_t parser;
 
 public:
-    shell(const func_t &_func) : func(_func) {}
-    shell(func_t &&_func) : func(_func) {}
-    std::optional<O> operator()(std::istream &is) const { return func(is); }
+    shell(const parser_t &_parser) : parser(_parser) {}
+    shell(parser_t &&_parser) : parser(_parser) {}
+    std::optional<T> operator()(std::istream &is) const { return parser(is); }
+
+    template <class F>
+    auto map(const F &func) const {
+        using T2 = std::invoke_result_t<F, T>;
+        return shell(mappers::mapper<T, T2>(*this, func));
+    }
+    template <class F>
+    auto map(F &&func) const {
+        using T2 = std::invoke_result_t<F, T>;
+        return shell(mappers::mapper<T, T2>(std::move(*this), func));
+    }
+    template <class F>
+    auto opt_map(F &&func) const {
+        using T2 = std::invoke_result_t<F, T>::value_type;
+        return shell(mappers::opt_mapper<T, T2>(std::move(*this), func));
+    }
 };
 
 template <class F>
     requires std::invocable<F, std::istream &>
-shell(const F &) -> shell<typename std::invoke_result_t<F, std::istream &>::value_type>;
-
-template <class F>
-    requires std::invocable<F, std::istream &>
-shell(F &&) -> shell<typename std::invoke_result_t<F, std::istream &>::value_type>;
+shell(F) -> shell<typename std::invoke_result_t<F, std::istream &>::value_type>;
 
 // atom //
 template <class T>
@@ -62,9 +75,6 @@ const static inline shell<char> alnum = shell(primitive::alnum);
 const static inline shell<char> hexdigit = shell(primitive::hexdigit);
 
 // tag //
-static inline shell<std::string> tag(std::string_view sv){
-    return shell(primitive::tag(sv));
-}
-
+static inline shell<std::string> tag(std::string_view sv) { return shell(primitive::tag(sv)); }
 
 } // namespace tokenizes

@@ -24,7 +24,7 @@ public:
             chars.set((unsigned)c);
         }
     }
-    constexpr atom(unsigned char _char) { chars.set(_char); }
+    atom(unsigned char _char) { chars.set(_char); }
 
     atom(const atom &) = default;
     atom(atom &&) = default;
