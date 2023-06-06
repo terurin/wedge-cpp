@@ -27,7 +27,7 @@ TEST(mapper, digit_fail) {
 
 namespace opt_tests {
 
-const static auto digit_parser = opt_mapper<char, int>(digit, [](char c) -> std::optional<int> {
+const static auto digit_parser = opt_mapper(digit, [](char c) -> std::optional<int> {
     if ('0' <= c && c <= '9') {
         return (int)c - '0';
     } else {
@@ -49,5 +49,24 @@ TEST(opt_mapper, digit_fail) {
     EXPECT_EQ(digit_parser(ss), nullopt);
 }
 
-
 } // namespace opt_tests
+
+namespace to_value_tests {
+
+const static auto digit_parser = to_value(digit, true);
+
+TEST(to_value, digit_success) {
+    std::stringstream ss;
+
+    ss << "0";
+    EXPECT_EQ(digit_parser(ss), true);
+}
+
+TEST(to_value, digit_fail) {
+    std::stringstream ss;
+
+    ss << "x";
+    EXPECT_EQ(digit_parser(ss), nullopt);
+}
+
+}; // namespace to_value_tests

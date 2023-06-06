@@ -44,4 +44,22 @@ TEST(shell, opt_map_fail) {
     EXPECT_EQ(digit_parser(ss), nullopt);
 }
 
+} // namespace opt_map
+
+namespace to_value {
+const static auto parser = digit.to_value(true);
+TEST(shell, to_value_success) {
+
+    std::stringstream ss;
+    ss << "0";
+    EXPECT_EQ(parser(ss), true);
 }
+
+TEST(shell, to_value_fail) {
+
+    std::stringstream ss;
+    ss << "x";
+    EXPECT_EQ(parser(ss), nullopt);
+}
+
+}; // namespace to_value

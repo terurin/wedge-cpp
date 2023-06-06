@@ -41,12 +41,29 @@ public:
     template <class F>
     auto map(F &&func) const {
         using T2 = std::invoke_result_t<F, T>;
-        return shell(mappers::mapper<T, T2>(std::move(*this), func));
+        return shell(mappers::mapper<T, T2>(std::move(*this), std::move(func)));
     }
+
+    template <class F>
+    auto opt_map(const F &func) const {
+        using T2 = std::invoke_result_t<F, T>::value_type;
+        return shell(mappers::opt_mapper<T, T2>(*this, func));
+    }
+
     template <class F>
     auto opt_map(F &&func) const {
         using T2 = std::invoke_result_t<F, T>::value_type;
-        return shell(mappers::opt_mapper<T, T2>(std::move(*this), func));
+        return shell(mappers::opt_mapper<T, T2>(std::move(*this), std::move(func)));
+    }
+
+    template <class V>
+    auto to_value(const V &v) const{
+        return shell(mappers::to_value<T, V>(*this, v));
+    }
+
+    template <class V>
+    auto to_value(V &&v) {
+        return shell(mappers::to_value<T, V>(std::move(*this), std::move(v)));
     }
 };
 
