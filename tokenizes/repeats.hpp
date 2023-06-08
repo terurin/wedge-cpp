@@ -103,4 +103,27 @@ static inline auto many1(P &&p) {
     return repeat<char, std::string>(std::move(p), 1);
 }
 
+template <class P>
+static inline auto some(const P &p) {
+    using T = std::invoke_result_t<P, std::istream &>::value_type;
+    return repeat<T, std::vector<T>>(p, 0, 1);
+}
+
+template <class P>
+static inline auto some(P &&p) {
+    using T = std::invoke_result_t<P, std::istream &>::value_type;
+    return repeat<T, std::vector<T>>(std::move(p), 0, 1);
+}
+
+template <char_parser P>
+static inline auto some(const P &p) {
+    return repeat<char, std::string>(p, 0, 1);
+}
+
+template <char_parser P>
+static inline auto some(P &&p) {
+    using T = std::invoke_result_t<P, std::istream &>::value_type;
+    return repeat<char, std::string>(std::move(p), 0, 1);
+}
+
 } // namespace tokenizes::repeats
