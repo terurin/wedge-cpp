@@ -16,6 +16,7 @@
 
 #include "mappers.hpp"
 #include "primitive.hpp"
+#include "repeats.hpp"
 
 namespace tokenizes {
 
