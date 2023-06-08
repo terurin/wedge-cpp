@@ -58,7 +58,7 @@ public:
     }
 
     template <class V>
-    auto to_value(const V &v) const{
+    auto to_value(const V &v) const {
         return shell(mappers::to_value<T, V>(*this, v));
     }
 
@@ -66,6 +66,13 @@ public:
     auto to_value(V &&v) {
         return shell(mappers::to_value<T, V>(std::move(*this), std::move(v)));
     }
+
+    auto to_repeat(size_t n, size_t m) const { return shell(repeats::repeat(*this, n, m)); }
+    auto to_repeat(size_t n, size_t m) { return shell(repeats::repeat(std::move(*this), n, m)); }
+    auto to_many0() const { return shell(repeats::many0(*this)); }
+    auto to_many0() { return shell(repeats::many0(std::move(*this))); }
+    auto to_many1() const { return shell(repeats::many1(*this)); }
+    auto to_many1() { return shell(repeats::many1(std::move(*this))); }
 };
 
 template <class F>
