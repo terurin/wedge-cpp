@@ -40,7 +40,7 @@ public:
         return shell(mappers::mapper<T, T2>(*this, func));
     }
     template <class F>
-    auto map(F &&func) const {
+    auto into_map(F &&func) const {
         using T2 = std::invoke_result_t<F, T>;
         return shell(mappers::mapper<T, T2>(std::move(*this), std::move(func)));
     }
@@ -52,7 +52,7 @@ public:
     }
 
     template <class F>
-    auto opt_map(F &&func) const {
+    auto into_opt_map(F &&func) const {
         using T2 = std::invoke_result_t<F, T>::value_type;
         return shell(mappers::opt_mapper<T, T2>(std::move(*this), std::move(func)));
     }
@@ -68,11 +68,11 @@ public:
     }
 
     auto to_repeat(size_t n, size_t m) const { return shell(repeats::repeat(*this, n, m)); }
-    auto to_repeat(size_t n, size_t m) { return shell(repeats::repeat(std::move(*this), n, m)); }
+    auto into_repeat(size_t n, size_t m) { return shell(repeats::repeat(std::move(*this), n, m)); }
     auto to_many0() const { return shell(repeats::many0(*this)); }
-    auto to_many0() { return shell(repeats::many0(std::move(*this))); }
+    auto into_many0() { return shell(repeats::many0(std::move(*this))); }
     auto to_many1() const { return shell(repeats::many1(*this)); }
-    auto to_many1() { return shell(repeats::many1(std::move(*this))); }
+    auto into_many1() { return shell(repeats::many1(std::move(*this))); }
 };
 
 template <class F>
