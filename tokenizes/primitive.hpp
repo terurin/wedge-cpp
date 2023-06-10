@@ -4,6 +4,8 @@
 #include <iostream>
 #include <optional>
 #include <string_view>
+
+#include "either.hpp"
 namespace tokenizes::primitive {
 
 struct escaped_char {
