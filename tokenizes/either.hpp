@@ -3,7 +3,7 @@
 #include <concepts>
 #include <optional>
 
-namespace tokenize {
+namespace tokenize::eithers {
 
 template <class R>
 struct right {
@@ -35,10 +35,10 @@ class either {
     either_mode mode;
     std::byte memory[max_size];
 
-    R *get_right_ptr() { return *(R *)memory; }
-    const R *get_right_ptr() const { return *(R *)memory; }
-    L *get_left_ptr() { return *(L *)memory; }
-    const L *get_left_ptr() const { return *(L *)memory; }
+    R *get_right_ptr() { return (R *)memory; }
+    const R *get_right_ptr() const { return (R *)memory; }
+    L *get_left_ptr() { return (L *)&memory; }
+    const L *get_left_ptr() const { return (L *)memory; }
 
     // allocate
     void allocate() { mode = either_mode::none; }
@@ -53,12 +53,12 @@ class either {
     }
 
     void allocate(const L &left) {
-        new (memory) R(left);
+        new (memory) L(left);
         mode = either_mode::left;
     }
 
     void allocate(L &&left) {
-        new (memory) R(left);
+        new (memory) L(left);
         mode = either_mode::left;
     }
 
@@ -167,32 +167,41 @@ public:
     bool is_left() const { return mode == either_mode::left; }
 
     // opt-*
-    std::optional<R> opt_right() const { return mode == either_mode::right ? *get_right_ptr() : std::nullopt; }
-    std::optional<L> opt_left() const { return mode == either_mode::left ? *get_left_ptr() : std::nullopt; }
-
+    std::optional<R> opt_right() const {
+        if (mode != either_mode::right) {
+            return std::nullopt;
+        }
+        return *get_right_ptr();
+    }
+    std::optional<L> opt_left() const {
+        if (mode != either_mode::left) {
+            return std::nullopt;
+        }
+        return *get_left_ptr();
+    }
     // get-*
     R &get_right() {
         if (!is_right()) {
-            throw std::range_error();
+            throw std::range_error("either is not right");
         }
         return *get_right_ptr();
     }
     const R &get_right() const {
         if (!is_right()) {
-            throw std::range_error();
+            throw std::range_error("either is not right");
         }
         return *get_right_ptr();
     }
 
     L &get_left() {
         if (!is_left()) {
-            throw std::range_error();
+            throw std::range_error("either is not left");
         }
         return *get_left_ptr();
     }
     const L &get_left() const {
         if (!is_left()) {
-            throw std::range_error();
+            throw std::range_error("either is not left");
         }
         return *get_left_ptr();
     }
@@ -227,6 +236,9 @@ public:
             return value;
         }
     }
+
+    // *-map
+
 };
 
-} // namespace tokenize
+} // namespace tokenize::eithers
