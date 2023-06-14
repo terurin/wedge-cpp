@@ -51,22 +51,22 @@ TEST(mapper, digit_fail) {
 
 // } // namespace opt_tests
 
-// namespace to_value_tests {
+namespace to_value_tests {
 
-// const static auto digit_parser = to_value(digit, true);
+const static auto digit_parser = to_value(digit, true);
 
-// TEST(to_value, digit_success) {
-//     std::stringstream ss;
+TEST(to_value, digit_success) {
+    std::stringstream ss;
 
-//     ss << "0";
-//     EXPECT_EQ(digit_parser(ss), true);
-// }
+    ss << "0";
+    EXPECT_EQ(digit_parser(ss).opt_right(), true);
+}
 
-// TEST(to_value, digit_fail) {
-//     std::stringstream ss;
+TEST(to_value, digit_fail) {
+    std::stringstream ss;
 
-//     ss << "x";
-//     EXPECT_EQ(digit_parser(ss), nullopt);
-// }
+    ss << "x";
+    EXPECT_EQ(digit_parser(ss).opt_right(), nullopt);
+}
 
-// }; // namespace to_value_tests
+}; // namespace to_value_tests
