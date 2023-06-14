@@ -4,12 +4,11 @@
 #include <string>
 // using namespace tokenizes;
 using namespace tokenizes::primitive;
-using namespace std;
 
 TEST(atom, single_success) {
     const auto parser = atom('a');
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "a";
     EXPECT_EQ(parser(ss).opt_right(), 'a');
 }
@@ -17,7 +16,7 @@ TEST(atom, single_success) {
 TEST(atom, single_fail) {
     const auto parser = atom('a');
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "b";
     EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
@@ -25,7 +24,7 @@ TEST(atom, single_fail) {
 TEST(atom, list) {
     const auto parser = atom("abc");
 
-    stringstream ss;
+    std::stringstream ss;
     std::string s;
 
     ss << "a";
@@ -42,9 +41,8 @@ TEST(atom, list) {
 }
 
 TEST(atom, range) {
-
     const auto parser = atom::from_range('2', '8');
-    stringstream ss;
+    std::stringstream ss;
     std::string s;
     ss << "2";
     EXPECT_EQ(parser(ss).opt_right(), '2');
@@ -56,3 +54,25 @@ TEST(atom, range) {
     ss << "9";
     EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
+
+namespace tag_tests {
+const static auto parser = tag("hello");
+TEST(tag, hello_success) {
+    std::stringstream ss;
+    ss << "hello";
+    EXPECT_EQ(parser(ss).opt_right(), "hello");
+}
+
+TEST(tag, hello_world_success) {
+    std::stringstream ss;
+    ss << "hello world";
+    EXPECT_EQ(parser(ss).opt_right(), "hello");
+}
+
+TEST(tag, hello_fail) {
+    std::stringstream ss;
+    ss << "hell";
+    const auto r=parser(ss).opt_right();
+    EXPECT_EQ(r,std::nullopt);
+}
+} // namespace tag_tests

@@ -69,7 +69,7 @@ class tag {
 public:
     tag(std::string_view sv) : str(sv) {}
     tag &set(std::string_view sv) { return str = sv, *this; }
-    virtual std::optional<std::string> operator()(std::istream &ss) const;
+    either<std::string, std::nullopt_t> operator()(std::istream &ss) const;
 };
 
 } // namespace tokenizes::primitive

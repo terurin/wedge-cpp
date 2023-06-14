@@ -75,17 +75,17 @@ either<char, std::nullopt_t> atom::operator()(std::istream &ss) const {
     return right(input);
 }
 
-std::optional<std::string> tag::operator()(std::istream &ss) const {
+either<std::string, std::nullopt_t> tag::operator()(std::istream &ss) const {
     std::string r;
     auto pos = ss.tellg();
     for (const char c : str) {
         const int input = ss.get();
-        if (input != -1 && input != c) {
+        if (input != (int)c) {
             ss.seekg(pos);
-            return std::nullopt;
+            return left(std::nullopt);
         }
     }
-    return str;
+    return right(str);
 }
 
 } // namespace tokenizes::primitive
