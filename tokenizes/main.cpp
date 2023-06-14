@@ -1,10 +1,10 @@
-#include "parsers.hpp"
+// #include "parsers.hpp"
 
 #include <iostream>
 #include <regex>
 #include <sstream>
 using namespace std;
-using namespace tokenizes;
+// using namespace tokenizes;
 int main(int argc, char **argv) {
     stringstream ss;
     ss << "aa";
@@ -12,11 +12,7 @@ int main(int argc, char **argv) {
     char c;
     // empty_t empty;
 
-    auto parser = atom('a');
-    
-    
-    
-    
+    //  auto parser = atom('a');
 
     // auto parser =
     //  mapper<std::string, std::string, empty_t>::create(atom::create('a'), [](std::string &d, const std::string &s) {

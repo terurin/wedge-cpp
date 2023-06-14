@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 #include <sstream>
 #include <string>
-//using namespace tokenizes;
+// using namespace tokenizes;
 using namespace tokenizes::primitive;
 using namespace std;
 
@@ -11,7 +11,7 @@ TEST(atom, single_success) {
 
     stringstream ss;
     ss << "a";
-    EXPECT_EQ(parser(ss), 'a');
+    EXPECT_EQ(parser(ss).opt_right(), 'a');
 }
 
 TEST(atom, single_fail) {
@@ -19,7 +19,7 @@ TEST(atom, single_fail) {
 
     stringstream ss;
     ss << "b";
-    EXPECT_EQ(parser(ss), std::nullopt);
+    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
 
 TEST(atom, list) {
@@ -29,16 +29,16 @@ TEST(atom, list) {
     std::string s;
 
     ss << "a";
-    EXPECT_EQ(parser(ss), 'a');
+    EXPECT_EQ(parser(ss).opt_right(), 'a');
 
     ss << "b";
-    EXPECT_EQ(parser(ss), 'b');
+    EXPECT_EQ(parser(ss).opt_right(), 'b');
 
     ss << "c";
-    EXPECT_EQ(parser(ss), 'c');
+    EXPECT_EQ(parser(ss).opt_right(), 'c');
 
     ss << "d";
-    EXPECT_EQ(parser(ss), std::nullopt);
+    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
 
 TEST(atom, range) {
@@ -47,12 +47,12 @@ TEST(atom, range) {
     stringstream ss;
     std::string s;
     ss << "2";
-    EXPECT_EQ(parser(ss), '2');
+    EXPECT_EQ(parser(ss).opt_right(), '2');
     ss << "8";
-    EXPECT_EQ(parser(ss), '8');
+    EXPECT_EQ(parser(ss).opt_right(), '8');
     ss << "1";
-    EXPECT_EQ(parser(ss), std::nullopt);
+    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
     ss.ignore();
     ss << "9";
-    EXPECT_EQ(parser(ss), std::nullopt);
+    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }

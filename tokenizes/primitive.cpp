@@ -2,6 +2,9 @@
 
 namespace tokenizes::primitive {
 
+using tokenizes::eithers::left;
+using tokenizes::eithers::right;
+
 std::ostream &operator<<(std::ostream &os, const escaped_char &ec) {
     const char c = ec.c;
 
@@ -61,15 +64,15 @@ std::ostream &operator<<(std::ostream &os, const atom &s) {
     return os;
 }
 
-std::optional<char> atom::operator()(std::istream &ss) const {
+either<char, std::nullopt_t> atom::operator()(std::istream &ss) const {
     std::string r;
 
     const int input = ss.peek();
-    if (input == -1||  !chars.test(input)) {
-        return std::nullopt;
+    if (input == -1 || !chars.test(input)) {
+        return left(std::nullopt);
     }
     ss.ignore();
-    return input;
+    return right(input);
 }
 
 std::optional<std::string> tag::operator()(std::istream &ss) const {
@@ -85,4 +88,4 @@ std::optional<std::string> tag::operator()(std::istream &ss) const {
     return str;
 }
 
-} // namespace tokenizes
+} // namespace tokenizes::primitive

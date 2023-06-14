@@ -8,6 +8,8 @@
 #include "either.hpp"
 namespace tokenizes::primitive {
 
+using tokenizes::eithers::either;
+
 struct escaped_char {
     char c;
     escaped_char(char _c) : c(_c) {}
@@ -32,7 +34,7 @@ public:
     atom(atom &&) = default;
     virtual ~atom() = default;
 
-    virtual std::optional<char> operator()(std::istream &ss) const;
+    either<char, std::nullopt_t> operator()(std::istream &ss) const;
 
     const chars_t &get_chars() const { return chars; }
 
@@ -60,7 +62,6 @@ static inline atom alpha = small + large;
 static inline atom digit = atom::from_range('0', '9');
 static inline atom alnum = small + large + digit;
 static inline atom hexdigit = digit + atom::from_range('a', 'f') + atom::from_range('A', 'F');
-
 
 class tag {
     std::string str;
