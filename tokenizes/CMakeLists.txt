@@ -12,7 +12,7 @@ target_link_libraries(tokenize_main tokenize)
 #   parsers_test.cpp primitive_test.cpp mappers_test.cpp repeats_test.cpp either_test.cpp
 # )
 add_executable(tokenize_test 
-  primitive_test.cpp either_test.cpp
+either_test.cpp primitive_test.cpp mappers_test.cpp
 )
 target_link_libraries(tokenize_test tokenize gtest gtest_main pthread)
 add_test(NAME tokenize_test COMMAND tokenize_test)
