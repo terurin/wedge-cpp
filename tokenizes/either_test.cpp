@@ -2,7 +2,7 @@
 #include "repeats.hpp"
 #include "gtest/gtest.h"
 #include <sstream>
-using namespace tokenize::eithers;
+using namespace tokenizes::eithers;
 
 TEST(either, right_prop) {
     either<int, std::string> e = right(1);
@@ -17,7 +17,7 @@ TEST(either, right_prop) {
     EXPECT_EQ(e.opt_left(), std::nullopt);
 
     // get
-    EXPECT_EQ(*e.get_right(), 1);
+    EXPECT_EQ(e.get_right(), 1);
     EXPECT_THROW(e.get_left(), std::range_error);
 
     // get-*-or
@@ -26,7 +26,8 @@ TEST(either, right_prop) {
 }
 
 TEST(either, left_prop) {
-    either<int, std::string> e = left<std::string>("abc");
+    using namespace std::string_view_literals;
+    either<int, std::string> e =left("abc"sv);
 
     EXPECT_EQ(e.get_mode(), either_mode::left);
     EXPECT_FALSE(e.is_none());
@@ -39,7 +40,7 @@ TEST(either, left_prop) {
 
     // get
     EXPECT_THROW(e.get_right(), std::range_error);
-    EXPECT_EQ(*e.get_left(), "abc");
+    EXPECT_EQ(e.get_left(), "abc");
 
     // get-*-or
     EXPECT_EQ(e.get_right_or(2), 2);
