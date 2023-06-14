@@ -36,6 +36,8 @@ class either {
     std::byte memory[max_size];
 
 public:
+    using right_t = R;
+    using left_t = L;
     either() : mode(either_mode::none) {}
     template <std::constructible_from<R> IR>
     either(right<IR> &&_right) : mode(either_mode::right) {
