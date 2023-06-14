@@ -1,5 +1,6 @@
 #pragma once
 #include "either.hpp"
+#include <concepts>
 #include <functional>
 #include <istream>
 #include <optional>
@@ -38,7 +39,8 @@ public:
     }
 };
 
-template <class F1, class F2>
+template <std::invocable<std::istream &> F1,
+          std::invocable<typename std::invoke_result_t<F1, std::istream &>::right_t> F2>
 mapper(F1, F2) -> mapper<typename std::invoke_result_t<F1, std::istream &>::right_t,
                          typename std::invoke_result_t<F2, typename std::invoke_result_t<F1, std::istream &>::right_t>,
                          typename std::invoke_result_t<F1, std::istream &>::left_t>;
@@ -70,7 +72,7 @@ public:
     }
 };
 
-template <class F, class T>
+template <std::invocable<std::istream &> F, class T>
 to_value(F, T) -> to_value<typename std::invoke_result_t<F, std::istream &>::right_t, T,
                            typename std::invoke_result_t<F, std::istream &>::left_t>;
 
