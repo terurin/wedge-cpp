@@ -49,7 +49,7 @@ public:
 
     template <class V>
     auto constant(V &&v) const {
-        return shell(mappers::constant<R, V, L>(*this, v));
+        return shell(mappers::constant(*this, v));
     }
 
     // auto to_repeat(size_t n, size_t m) const { return shell(repeats::repeat(*this, n, m)); }

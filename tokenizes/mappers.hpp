@@ -1,4 +1,5 @@
 #pragma once
+#include "concepts.hpp"
 #include "either.hpp"
 #include <concepts>
 #include <functional>
@@ -6,6 +7,10 @@
 #include <optional>
 namespace tokenizes::mappers {
 
+using tokenizes::concepts::either_of;
+using tokenizes::concepts::left_of;
+using tokenizes::concepts::parsable;
+using tokenizes::concepts::right_of;
 using tokenizes::eithers::either;
 using tokenizes::eithers::either_mode;
 using tokenizes::eithers::left;
@@ -45,25 +50,23 @@ mapper(F1, F2) -> mapper<typename std::invoke_result_t<F1, std::istream &>::righ
                          typename std::invoke_result_t<F2, typename std::invoke_result_t<F1, std::istream &>::right_t>,
                          typename std::invoke_result_t<F1, std::istream &>::left_t>;
 
-template <class R, class V, class L>
+template <concepts::parsable P, class V>
 class constant {
-public:
-    using parser_t = std::function<either<R, L>(std::istream &)>;
 
 private:
-    parser_t parser;
+    P parser;
     V value;
 
 public:
-    constant(const parser_t &_parser, const V &_value) : parser(_parser), value(_value) {}
-    //constant(parser_t &&_parser, V &&_value) : parser(_parser), value(_value) {}
-    either<V, L> operator()(std::istream &is) const {
-        const either<R, L> result = parser(is);
+    constant(const P &_parser, const V &_value) : parser(_parser), value(_value) {}
+    // constant(parser_t &&_parser, V &&_value) : parser(_parser), value(_value) {}
+    either<V, left_of<P>> operator()(std::istream &is) const {
+        either_of<P> result = parser(is);
         switch (result.get_mode()) {
         case either_mode::right:
             return right<V>(value);
         case either_mode::left:
-            return left<L>(result.get_left());
+            return left<left_of<P>>(result.get_left());
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:
@@ -71,9 +74,5 @@ public:
         }
     }
 };
-
-template <std::invocable<std::istream &> F, class V>
-constant(F, V) -> constant<typename std::invoke_result_t<F, std::istream &>::right_t, V,
-                           typename std::invoke_result_t<F, std::istream &>::left_t>;
 
 } // namespace tokenizes::mappers
