@@ -5,6 +5,8 @@
 // using namespace tokenizes;
 using namespace tokenizes::primitive;
 
+namespace atom_tests {
+
 TEST(atom, single_success) {
     const auto parser = atom('a');
 
@@ -55,6 +57,13 @@ TEST(atom, range) {
     EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
 
+TEST(atom, concept) {
+    using tokenizes::eithers::parsable;
+    EXPECT_TRUE(parsable<atom>);
+}
+
+} // namespace atom_tests
+
 namespace tag_tests {
 const static auto parser = tag("hello");
 TEST(tag, hello_success) {
@@ -72,7 +81,13 @@ TEST(tag, hello_world_success) {
 TEST(tag, hello_fail) {
     std::stringstream ss;
     ss << "hell";
-    const auto r=parser(ss).opt_right();
-    EXPECT_EQ(r,std::nullopt);
+    const auto r = parser(ss).opt_right();
+    EXPECT_EQ(r, std::nullopt);
 }
+
+TEST(tag, concept) {
+    using tokenizes::eithers::parsable;
+    EXPECT_TRUE(parsable<tag>);
+}
+
 } // namespace tag_tests
