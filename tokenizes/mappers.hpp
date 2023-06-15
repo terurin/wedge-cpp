@@ -16,26 +16,24 @@ using tokenizes::eithers::either_mode;
 using tokenizes::eithers::left;
 using tokenizes::eithers::right;
 
-template <class R1, class R2, class L>
+template <parsable P, std::invocable<right_of<P>> M>
 class mapper {
-public:
-    using parser_t = std::function<either<R1, L>(std::istream &)>;
-    using map_t = std::function<R2(R1)>;
+    using right_t = std::invoke_result_t<M, right_of<P>>;
+    using left_t = left_of<P>;
 
 private:
-    parser_t parser;
-    map_t map;
+    P parser;
+    M map;
 
 public:
-    mapper(const parser_t &_parser, const map_t &_map) : parser(_parser), map(_map) {}
-    mapper(parser_t &&_parser, map_t &&_map) : parser(_parser), map(_map) {}
-    either<R2, L> operator()(std::istream &is) const {
-        const either<R1, L> result = parser(is);
+    mapper(const P &_parser, const M &_map) : parser(_parser), map(_map) {}
+    either<right_t, left_t> operator()(std::istream &is) const {
+        const either_of<P> result = parser(is);
         switch (result.get_mode()) {
         case either_mode::right:
-            return right<R2>(map(result.get_right()));
+            return right<right_t>(map(result.get_right()));
         case either_mode::left:
-            return left<L>(result.get_left());
+            return left<left_t>(result.get_left());
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:
@@ -44,13 +42,7 @@ public:
     }
 };
 
-template <std::invocable<std::istream &> F1,
-          std::invocable<typename std::invoke_result_t<F1, std::istream &>::right_t> F2>
-mapper(F1, F2) -> mapper<typename std::invoke_result_t<F1, std::istream &>::right_t,
-                         typename std::invoke_result_t<F2, typename std::invoke_result_t<F1, std::istream &>::right_t>,
-                         typename std::invoke_result_t<F1, std::istream &>::left_t>;
-
-template <concepts::parsable P, std::copy_constructible V>
+template <parsable P, std::copy_constructible V>
 class constant {
 
 private:

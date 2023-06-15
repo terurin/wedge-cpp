@@ -43,8 +43,7 @@ public:
 
     template <class F>
     auto map(F &&func) const {
-        using R2 = std::invoke_result_t<F, R>;
-        return shell(mappers::mapper<R, R2, L>(*this, func));
+        return shell(mappers::mapper(*this, func));
     }
 
     template <class V>
