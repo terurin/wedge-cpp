@@ -50,7 +50,7 @@ mapper(F1, F2) -> mapper<typename std::invoke_result_t<F1, std::istream &>::righ
                          typename std::invoke_result_t<F2, typename std::invoke_result_t<F1, std::istream &>::right_t>,
                          typename std::invoke_result_t<F1, std::istream &>::left_t>;
 
-template <concepts::parsable P, class V>
+template <concepts::parsable P, std::copy_constructible V>
 class constant {
 
 private:
@@ -59,7 +59,9 @@ private:
 
 public:
     constant(const P &_parser, const V &_value) : parser(_parser), value(_value) {}
-    // constant(parser_t &&_parser, V &&_value) : parser(_parser), value(_value) {}
+    constant(const constant &) = default;
+    constant(constant &&) = default;
+
     either<V, left_of<P>> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
