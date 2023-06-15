@@ -10,7 +10,10 @@ concept parsable = std::invocable<P, std::istream &> && std::move_constructible<
                    };
 
 template <parsable P>
-using right_of = std::invoke_result_t<P, std::istream &>::right_t;
+using either_of = typename std::invoke_result_t<P, std::istream &>;
+
 template <parsable P>
-using left_of = std::invoke_result_t<P, std::istream &>::left_t;
+using right_of = typename std::invoke_result_t<P, std::istream &>::right_t;
+template <parsable P>
+using left_of = typename std::invoke_result_t<P, std::istream &>::left_t;
 }
