@@ -27,16 +27,16 @@ TEST(mapper, digit_fail) {
 
 namespace to_value_tests {
 
-const static auto digit_parser = to_value(digit, true);
+const static auto digit_parser = constant(digit, true);
 
-TEST(to_value, digit_success) {
+TEST(constant, digit_success) {
     std::stringstream ss;
 
     ss << "0";
     EXPECT_EQ(digit_parser(ss).opt_right(), true);
 }
 
-TEST(to_value, digit_fail) {
+TEST(constant, digit_fail) {
     std::stringstream ss;
 
     ss << "x";

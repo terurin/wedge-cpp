@@ -12,54 +12,31 @@ const static auto digit_parser = digit.map([](char c) { return (int)c - '0'; });
 TEST(shell, map_success) {
     std::stringstream ss;
     ss << "0";
-    EXPECT_EQ(digit_parser(ss), 0);
+    EXPECT_EQ(digit_parser(ss).opt_right(), 0);
 }
 
 TEST(shell, map_fail) {
     std::stringstream ss;
     ss << "x";
-    EXPECT_EQ(digit_parser(ss), nullopt);
+    EXPECT_EQ(digit_parser(ss).opt_right(), std::nullopt);
 }
 
 } // namespace map
 
-namespace opt_map {
-const static auto digit_parser = digit.opt_map([](char c) -> std::optional<int> {
-    if ('0' <= c && c <= '9') {
-        return (int)c - '0';
-    } else {
-        return nullopt;
-    }
-});
-
-TEST(shell, opt_map_success) {
-    std::stringstream ss;
-    ss << "0";
-    EXPECT_EQ(digit_parser(ss), 0);
-}
-
-TEST(shell, opt_map_fail) {
-    std::stringstream ss;
-    ss << "x";
-    EXPECT_EQ(digit_parser(ss), nullopt);
-}
-
-} // namespace opt_map
-
-namespace to_value {
-const static auto parser = digit.to_value(true);
-TEST(shell, to_value_success) {
+namespace constant_tests {
+const static auto parser = digit.constant(true);
+TEST(shell, constant_success) {
 
     std::stringstream ss;
     ss << "0";
-    EXPECT_EQ(parser(ss), true);
+    EXPECT_EQ(parser(ss).opt_right(), true);
 }
 
-TEST(shell, to_value_fail) {
+TEST(shell, constant_fail) {
 
     std::stringstream ss;
     ss << "x";
-    EXPECT_EQ(parser(ss), nullopt);
+    EXPECT_EQ(parser(ss).opt_right(), nullopt);
 }
 
-}; // namespace to_value
+}; // namespace constant_tests

@@ -48,13 +48,13 @@ public:
         new (memory) L(*_left);
     }
     template <std::constructible_from<R> IR, std::constructible_from<L> IL>
-    either(either<IR, IL> &&_either) : mode(_either.mode) {
+    either(either<IR, IL> &&_either) : mode(_either.get_mode()) {
         switch (mode) {
         case either_mode::right:
-            new (memory) R(std::move(*reinterpret_cast<IR *>(_either.memory)));
+            new (memory) R(_either.get_right());
             return;
         case either_mode::left:
-            new (memory) L(std::move(*reinterpret_cast<IL *>(_either.memory)));
+            new (memory) L(_either.get_left());
             return;
         case either_mode::none:
             return;

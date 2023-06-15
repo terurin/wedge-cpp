@@ -46,7 +46,7 @@ mapper(F1, F2) -> mapper<typename std::invoke_result_t<F1, std::istream &>::righ
                          typename std::invoke_result_t<F1, std::istream &>::left_t>;
 
 template <class R, class V, class L>
-class to_value {
+class constant {
 public:
     using parser_t = std::function<either<R, L>(std::istream &)>;
 
@@ -55,8 +55,8 @@ private:
     V value;
 
 public:
-    to_value(const parser_t &_parser, const V &_value) : parser(_parser), value(_value) {}
-    to_value(parser_t &&_parser, V &&_value) : parser(_parser), value(_value) {}
+    constant(const parser_t &_parser, const V &_value) : parser(_parser), value(_value) {}
+    //constant(parser_t &&_parser, V &&_value) : parser(_parser), value(_value) {}
     either<V, L> operator()(std::istream &is) const {
         const either<R, L> result = parser(is);
         switch (result.get_mode()) {
@@ -72,8 +72,8 @@ public:
     }
 };
 
-template <std::invocable<std::istream &> F, class T>
-to_value(F, T) -> to_value<typename std::invoke_result_t<F, std::istream &>::right_t, T,
+template <std::invocable<std::istream &> F, class V>
+constant(F, V) -> constant<typename std::invoke_result_t<F, std::istream &>::right_t, V,
                            typename std::invoke_result_t<F, std::istream &>::left_t>;
 
 } // namespace tokenizes::mappers
