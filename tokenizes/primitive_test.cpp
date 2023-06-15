@@ -1,4 +1,5 @@
 #include "primitive.hpp"
+#include "concepts.hpp"
 #include "gtest/gtest.h"
 #include <sstream>
 #include <string>
@@ -58,7 +59,7 @@ TEST(atom, range) {
 }
 
 TEST(atom, concept) {
-    using tokenizes::eithers::parsable;
+    using tokenizes::concepts::parsable;
     EXPECT_TRUE(parsable<atom>);
 }
 
@@ -86,7 +87,7 @@ TEST(tag, hello_fail) {
 }
 
 TEST(tag, concept) {
-    using tokenizes::eithers::parsable;
+    using tokenizes::concepts::parsable;
     EXPECT_TRUE(parsable<tag>);
 }
 
