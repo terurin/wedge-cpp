@@ -1,11 +1,10 @@
 #pragma once
 
-#include <bitset>
-#include <iostream>
-#include <optional>
-#include <string_view>
-
 #include "either.hpp"
+#include <bitset>
+#include <cstddef>
+#include <iostream>
+#include <string_view>
 namespace tokenizes::primitive {
 
 using tokenizes::eithers::either;
@@ -34,7 +33,7 @@ public:
     atom(atom &&) = default;
     virtual ~atom() = default;
 
-    either<char, std::nullopt_t> operator()(std::istream &ss) const;
+    either<char, std::nullptr_t> operator()(std::istream &ss) const;
 
     const chars_t &get_chars() const { return chars; }
 
@@ -69,7 +68,7 @@ class tag {
 public:
     tag(std::string_view sv) : str(sv) {}
     tag &set(std::string_view sv) { return str = sv, *this; }
-    either<std::string, std::nullopt_t> operator()(std::istream &ss) const;
+    either<std::string, std::nullptr_t> operator()(std::istream &ss) const;
 };
 
 } // namespace tokenizes::primitive

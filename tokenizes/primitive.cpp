@@ -64,25 +64,25 @@ std::ostream &operator<<(std::ostream &os, const atom &s) {
     return os;
 }
 
-either<char, std::nullopt_t> atom::operator()(std::istream &ss) const {
+either<char, std::nullptr_t> atom::operator()(std::istream &ss) const {
     std::string r;
 
     const int input = ss.peek();
     if (input == -1 || !chars.test(input)) {
-        return left(std::nullopt);
+        return left(nullptr);
     }
     ss.ignore();
     return right(input);
 }
 
-either<std::string, std::nullopt_t> tag::operator()(std::istream &ss) const {
+either<std::string, std::nullptr_t> tag::operator()(std::istream &ss) const {
     std::string r;
     auto pos = ss.tellg();
     for (const char c : str) {
         const int input = ss.get();
         if (input != (int)c) {
             ss.seekg(pos);
-            return left(std::nullopt);
+            return left(nullptr);
         }
     }
     return right(str);
