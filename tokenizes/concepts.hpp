@@ -16,4 +16,8 @@ template <parsable P>
 using right_of = typename std::invoke_result_t<P, std::istream &>::right_t;
 template <parsable P>
 using left_of = typename std::invoke_result_t<P, std::istream &>::left_t;
-}
+
+template <class C, class I>
+concept has_push_back = requires(C &c, const I &item) { c.push_back(item); };
+
+} // namespace tokenizes::concepts

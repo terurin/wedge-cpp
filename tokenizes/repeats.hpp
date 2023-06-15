@@ -8,6 +8,7 @@
 #include <vector>
 namespace tokenizes::repeats {
 using tokenizes::concepts::either_of;
+using tokenizes::concepts::has_push_back;
 using tokenizes::concepts::left_of;
 using tokenizes::concepts::parsable;
 using tokenizes::concepts::right_of;
@@ -15,7 +16,8 @@ using tokenizes::eithers::either;
 using tokenizes::eithers::either_mode;
 using tokenizes::eithers::left;
 using tokenizes::eithers::right;
-template <parsable P, class C>
+template <parsable P, has_push_back<right_of<P>> C>
+    requires std::default_initializable<C>
 class repeat {
 public:
     using right_t = C;
