@@ -68,10 +68,10 @@ template <class P>
 repeat(P, size_t, size_t) -> repeat<P, std::vector<right_of<P>>>;
 
 template <class P>
-concept char_parser = std::same_as<right_of<P>, char>;
+concept parsable_char = parsable<P> && std::same_as<right_of<P>, char>;
 
 // char -> std::string
-template <char_parser P>
+template <parsable_char P>
 repeat(P, size_t, size_t) -> repeat<P, std::string>;
 
 template <class P>
@@ -79,7 +79,7 @@ static inline auto many0(const P &p) {
     return repeat(p, 0);
 }
 
-template <char_parser P>
+template <parsable_char P>
 static inline auto many0(const P &p) {
     return repeat<P, std::string>(p, 0);
 }
@@ -89,7 +89,7 @@ static inline auto many1(const P &p) {
     return repeat(p, 1);
 }
 
-template <char_parser P>
+template <parsable_char P>
 static inline auto many1(const P &p) {
     return repeat<P, std::string>(p, 1);
 }
