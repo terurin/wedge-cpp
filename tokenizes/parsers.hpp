@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "concepts"
 #include "either.hpp"
 #include "mappers.hpp"
 #include "primitive.hpp"
@@ -21,6 +22,9 @@
 
 namespace tokenizes {
 
+using tokenizes::concepts::parsable;
+using tokenizes::concepts::left_of;
+using tokenizes::concepts::right_of;
 using tokenizes::eithers::either;
 using tokenizes::eithers::either_mode;
 using tokenizes::eithers::left;
@@ -64,13 +68,10 @@ public:
     auto repeat(size_t n, size_t m) const { return shell(repeats::repeat(*this, n, m)); }
     auto many0() const { return shell(repeats::many0(*this)); }
     auto many1() const { return shell(repeats::many1(*this)); }
-
 };
 
-template <class F>
-    requires std::invocable<F, std::istream &>
-shell(F) -> shell<typename std::invoke_result_t<F, std::istream &>::right_t,
-                  typename std::invoke_result_t<F, std::istream &>::left_t>;
+template <parsable P>
+shell(P) -> shell<right_of<P>, left_of<P>>;
 
 using shell_char = shell<char, nullptr_t>;
 
