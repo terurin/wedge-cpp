@@ -38,7 +38,7 @@ public:
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:
-            throw std::range_error("others case");
+            throw std::domain_error("mode domain error");
         }
     }
 };
@@ -64,7 +64,7 @@ public:
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:
-            throw std::range_error("others case");
+            throw std::domain_error("mode domain error");
         }
     }
 };
