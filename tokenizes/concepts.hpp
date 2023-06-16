@@ -1,6 +1,7 @@
 #pragma once
 #include "either.hpp"
 #include <concepts>
+#include <istream>
 namespace tokenizes::concepts {
 template <typename P>
 concept parsable = std::invocable<P, std::istream &> && std::move_constructible<P> && std::copy_constructible<P> &&

@@ -5,6 +5,7 @@
 #include <functional>
 #include <istream>
 #include <optional>
+#include <exception>
 namespace tokenizes::mappers {
 
 using tokenizes::concepts::either_of;

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <concepts>
 #include <optional>
-
+#include <stdexcept>
 namespace tokenizes::eithers {
 
 template <class R>
@@ -59,7 +59,7 @@ public:
         case either_mode::none:
             return;
         default:
-            throw std::range_error("either_mode is out");
+            throw std::domain_error("mode domain error");
         }
     }
     ~either() { reset(); }
@@ -79,7 +79,7 @@ public:
         case either_mode::none:
             break;
         default:
-            throw std::range_error("either_mode is out");
+            throw std::domain_error("mode domain error");
         }
         _either.reset();
         return *this;
@@ -111,7 +111,7 @@ public:
         case either_mode::none:
             break;
         default:
-            throw std::range_error("either_mode is out");
+            throw std::domain_error("mode domain error");
         }
         mode = either_mode::none;
     }
@@ -138,28 +138,28 @@ public:
     // get-*
     R &get_right() {
         if (!is_right()) {
-            throw std::range_error("either is not right");
+            throw std::out_of_range("mode domain error");
         }
         return *reinterpret_cast<R *>(memory);
     }
 
     const R &get_right() const {
         if (!is_right()) {
-            throw std::range_error("either is not right");
+            throw std::out_of_range("mode domain error");
         }
         return *reinterpret_cast<const R *>(memory);
     }
 
     L &get_left() {
         if (!is_left()) {
-            throw std::range_error("either is not left");
+            throw std::out_of_range("mode domain error");
         }
         return *reinterpret_cast<L *>(memory);
     }
 
     const L &get_left() const {
         if (!is_left()) {
-            throw std::range_error("either is not left");
+            throw std::out_of_range("mode domain error");
         }
         return *reinterpret_cast<const L *>(memory);
     }
@@ -194,7 +194,7 @@ public:
         case either_mode::none:
             return E();
         default:
-            throw std::range_error("unexpected mode");
+            throw std::domain_error("mode domain error");
         }
     }
 
@@ -210,7 +210,7 @@ public:
         case either_mode::none:
             return E();
         default:
-            throw std::range_error("unexpected mode");
+            throw std::domain_error("mode domain error");
         }
     }
 };

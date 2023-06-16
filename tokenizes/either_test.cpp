@@ -18,7 +18,7 @@ TEST(either, right_prop) {
 
     // get
     EXPECT_EQ(e.get_right(), 1);
-    EXPECT_THROW(e.get_left(), std::range_error);
+    EXPECT_THROW(e.get_left(), std::out_of_range);
 
     // get-*-or
     EXPECT_EQ(e.get_right_or(2), 1);
@@ -39,7 +39,7 @@ TEST(either, left_prop) {
     EXPECT_EQ(e.opt_left(), "abc");
 
     // get
-    EXPECT_THROW(e.get_right(), std::range_error);
+    EXPECT_THROW(e.get_right(), std::out_of_range);
     EXPECT_EQ(e.get_left(), "abc");
 
     // get-*-or
