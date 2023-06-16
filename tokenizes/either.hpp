@@ -164,6 +164,23 @@ public:
         return *reinterpret_cast<const L *>(memory);
     }
 
+    // to-*
+    right<R> to_right() const { return right<R>(get_right()); }
+    left<L> to_left() const { return left<L>(get_left()); }
+
+    // into_-*
+    right<R> into_right() {
+        const right<R> result = (std::move(get_right()));
+        reset();
+        return result;
+    }
+
+    left<L> into_left() {
+        const left<L> result(std::move(get_left()));
+        reset();
+        return result;
+    }
+
     // *-or
     R get_right_or(R &&value) const {
         if (is_right()) {

@@ -29,12 +29,12 @@ private:
 public:
     mapper_right(const P &_parser, M &&_map) : parser(_parser), map(_map) {}
     either<right_t, left_t> operator()(std::istream &is) const {
-        const either_of<P> result = parser(is);
+        either_of<P> result = parser(is);
         switch (result.get_mode()) {
         case either_mode::right:
             return right<right_t>(map(result.get_right()));
         case either_mode::left:
-            return left<left_t>(result.get_left());
+            return result.into_left();
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:
@@ -55,10 +55,10 @@ private:
 public:
     mapper_left(const P &_parser, M &&_map) : parser(_parser), map(_map) {}
     either<right_t, left_t> operator()(std::istream &is) const {
-        const either_of<P> result = parser(is);
+        either_of<P> result = parser(is);
         switch (result.get_mode()) {
         case either_mode::right:
-            return right<right_t>(result.get_right());
+            return result.into_right();
         case either_mode::left:
             return left<left_t>(map(result.get_left()));
         case either_mode::none:
@@ -86,7 +86,7 @@ public:
         case either_mode::right:
             return right<V>(value);
         case either_mode::left:
-            return left<left_of<P>>(result.get_left());
+            return result.into_left();
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:
@@ -110,7 +110,7 @@ public:
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
         case either_mode::right:
-            return right<right_of<P>>(result.get_right());
+            return result.into_right();
         case either_mode::left:
             return left<V>(value);
         case either_mode::none:
