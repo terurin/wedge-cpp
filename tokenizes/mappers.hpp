@@ -43,6 +43,32 @@ public:
     }
 };
 
+template <parsable P, std::invocable<left_of<P>> M>
+class mapper_left {
+    using right_t = right_of<P>;
+    using left_t = std::invoke_result_t<M, left_of<P>>;
+
+private:
+    P parser;
+    M map;
+
+public:
+    mapper_left(const P &_parser, M &&_map) : parser(_parser), map(_map) {}
+    either<right_t, left_t> operator()(std::istream &is) const {
+        const either_of<P> result = parser(is);
+        switch (result.get_mode()) {
+        case either_mode::right:
+            return right<right_t>(result.get_right());
+        case either_mode::left:
+            return left<left_t>(map(result.get_left()));
+        case either_mode::none:
+            throw std::range_error("none cannot map");
+        default:
+            throw std::domain_error("mode domain error");
+        }
+    }
+};
+
 template <parsable P, class V>
     requires std::move_constructible<V> && std::copy_constructible<V>
 class constant_right {
@@ -61,6 +87,32 @@ public:
             return right<V>(value);
         case either_mode::left:
             return left<left_of<P>>(result.get_left());
+        case either_mode::none:
+            throw std::range_error("none cannot map");
+        default:
+            throw std::domain_error("mode domain error");
+        }
+    }
+};
+
+template <parsable P, class V>
+    requires std::move_constructible<V> && std::copy_constructible<V>
+class constant_left {
+
+private:
+    P parser;
+    V value;
+
+public:
+    constant_left(const P &_parser, V &&_value) : parser(_parser), value(_value) {}
+
+    either<V, left_of<P>> operator()(std::istream &is) const {
+        either_of<P> result = parser(is);
+        switch (result.get_mode()) {
+        case either_mode::right:
+            return right<right_of<P>>(result.get_right());
+        case either_mode::left:
+            return left<V>(value);
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:

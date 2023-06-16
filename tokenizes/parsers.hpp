@@ -46,9 +46,19 @@ public:
         return shell(mappers::mapper_right(*this, std::move(func)));
     }
 
+    template <class F>
+    auto map_left(F &&func) const {
+        return shell(mappers::mapper_left(*this, std::move(func)));
+    }
+
     template <class V>
     auto const_right(V &&v) const {
         return shell(mappers::constant_right(*this, std::move(v)));
+    }
+
+    template <class V>
+    auto const_left(V &&v) const {
+        return shell(mappers::constant_left(*this, std::move(v)));
     }
 
     // auto to_repeat(size_t n, size_t m) const { return shell(repeats::repeat(*this, n, m)); }
