@@ -61,12 +61,10 @@ public:
         return shell(mappers::constant_left(*this, std::move(v)));
     }
 
-    // auto to_repeat(size_t n, size_t m) const { return shell(repeats::repeat(*this, n, m)); }
-    // auto into_repeat(size_t n, size_t m) { return shell(repeats::repeat(std::move(*this), n, m)); }
-    // auto to_many0() const { return shell(repeats::many0(*this)); }
-    // auto into_many0() { return shell(repeats::many0(std::move(*this))); }
-    // auto to_many1() const { return shell(repeats::many1(*this)); }
-    // auto into_many1() { return shell(repeats::many1(std::move(*this))); }
+    auto repeat(size_t n, size_t m) const { return shell(repeats::repeat(*this, n, m)); }
+    auto many0() const { return shell(repeats::many0(*this)); }
+    auto many1() const { return shell(repeats::many1(*this)); }
+
 };
 
 template <class F>
