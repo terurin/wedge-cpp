@@ -2,10 +2,10 @@
 #include "concepts.hpp"
 #include "either.hpp"
 #include <concepts>
+#include <exception>
 #include <functional>
 #include <istream>
 #include <optional>
-#include <exception>
 namespace tokenizes::mappers {
 
 using tokenizes::concepts::either_of;
@@ -18,7 +18,7 @@ using tokenizes::eithers::left;
 using tokenizes::eithers::right;
 
 template <parsable P, std::invocable<right_of<P>> M>
-class mapper {
+class mapper_right {
     using right_t = std::invoke_result_t<M, right_of<P>>;
     using left_t = left_of<P>;
 
@@ -27,7 +27,7 @@ private:
     M map;
 
 public:
-    mapper(const P &_parser, const M &_map) : parser(_parser), map(_map) {}
+    mapper_right(const P &_parser, M &&_map) : parser(_parser), map(_map) {}
     either<right_t, left_t> operator()(std::istream &is) const {
         const either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -43,17 +43,16 @@ public:
     }
 };
 
-template <parsable P, std::copy_constructible V>
-class constant {
+template <parsable P, class V>
+    requires std::move_constructible<V> && std::copy_constructible<V>
+class constant_right {
 
 private:
     P parser;
     V value;
 
 public:
-    constant(const P &_parser, const V &_value) : parser(_parser), value(_value) {}
-    constant(const constant &) = default;
-    constant(constant &&) = default;
+    constant_right(const P &_parser, V &&_value) : parser(_parser), value(_value) {}
 
     either<V, left_of<P>> operator()(std::istream &is) const {
         either_of<P> result = parser(is);

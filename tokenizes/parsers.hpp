@@ -42,13 +42,13 @@ public:
     either<R, L> operator()(std::istream &is) const { return parser(is); }
 
     template <class F>
-    auto map(F &&func) const {
-        return shell(mappers::mapper(*this, func));
+    auto map_right(F &&func) const {
+        return shell(mappers::mapper_right(*this, std::move(func)));
     }
 
     template <class V>
-    auto constant(V &&v) const {
-        return shell(mappers::constant(*this, v));
+    auto const_right(V &&v) const {
+        return shell(mappers::constant_right(*this, std::move(v)));
     }
 
     // auto to_repeat(size_t n, size_t m) const { return shell(repeats::repeat(*this, n, m)); }

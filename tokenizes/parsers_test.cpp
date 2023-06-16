@@ -7,7 +7,7 @@ using namespace std;
 
 namespace map {
 
-const static auto digit_parser = digit.map([](char c) { return (int)c - '0'; });
+const static auto digit_parser = digit.map_right([](char c) { return (int)c - '0'; });
 
 TEST(shell, map_success) {
     std::stringstream ss;
@@ -24,7 +24,7 @@ TEST(shell, map_fail) {
 } // namespace map
 
 namespace constant_tests {
-const static auto parser = digit.constant(true);
+const static auto parser = digit.const_right(true);
 TEST(shell, constant_success) {
 
     std::stringstream ss;

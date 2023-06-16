@@ -8,16 +8,16 @@ using namespace tokenizes::mappers;
 using namespace std;
 
 namespace mapper_tests {
-const static auto digit_parser = mapper(digit, [](char c) { return (int)c - '0'; });
+const static auto digit_parser = mapper_right(digit, [](char c) { return (int)c - '0'; });
 
-TEST(mapper, digit_success) {
+TEST(mapper_right, digit_success) {
     stringstream ss;
 
     ss << "0";
     EXPECT_EQ(digit_parser(ss).opt_right(), 0);
 }
 
-TEST(mapper, digit_fail) {
+TEST(mapper_right, digit_fail) {
     stringstream ss;
 
     ss << "x";
@@ -27,16 +27,16 @@ TEST(mapper, digit_fail) {
 
 namespace to_value_tests {
 
-const static auto digit_parser = constant(digit, true);
+const static auto digit_parser = constant_right(digit, true);
 
-TEST(constant, digit_success) {
+TEST(constant_right, digit_success) {
     std::stringstream ss;
 
     ss << "0";
     EXPECT_EQ(digit_parser(ss).opt_right(), true);
 }
 
-TEST(constant, digit_fail) {
+TEST(constant_right, digit_fail) {
     std::stringstream ss;
 
     ss << "x";
