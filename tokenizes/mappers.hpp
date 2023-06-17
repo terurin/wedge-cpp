@@ -132,7 +132,7 @@ public:
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
         case either_mode::right:
-            return right<std::nullopt_t>(nullptr);
+            return right(nullptr);
         case either_mode::left:
             return result.into_left();
         case either_mode::none:
@@ -155,7 +155,7 @@ public:
         case either_mode::right:
             return result.into_right();
         case either_mode::left:
-            return left<std::nullopt_t>(nullptr);
+            return left(nullptr);
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:

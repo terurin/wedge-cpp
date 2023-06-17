@@ -78,9 +78,49 @@ TEST(constant_left, digit_fail) {
     std::stringstream ss;
 
     ss << "x";
-    auto opt= parser(ss).opt_left();
-    EXPECT_EQ(opt, 0);
+    EXPECT_EQ(parser(ss).opt_left(), 0);
 }
 
-}; // namespace constant_right_tests
+}; // namespace constant_left_tests
 
+namespace eraser_right_tests {
+
+const static auto parser = eraser_right(digit);
+
+// right: char -> nullptr, left: nullptr -> nullptr
+TEST(eraser_right, digit_success) {
+    std::stringstream ss;
+
+    ss << "0";
+    EXPECT_TRUE(parser(ss).is_right());
+}
+
+TEST(eraser_right, digit_fail) {
+    std::stringstream ss;
+
+    ss << "x";
+    EXPECT_TRUE(parser(ss).is_left());
+}
+
+}; // namespace eraser_right_tests
+
+namespace eraser_left_tests {
+
+// right: char -> char, left: nullptr -> nullptr
+const static auto parser = eraser_left(digit);
+
+TEST(eraser_right, digit_success) {
+    std::stringstream ss;
+    
+    ss << "0";
+    EXPECT_EQ(parser(ss).opt_right(), '0');
+}
+
+TEST(eraser_right, digit_fail) {
+    std::stringstream ss;
+
+    ss << "x";
+    EXPECT_TRUE(parser(ss).is_left());
+}
+
+}; // namespace eraser_left_tests
