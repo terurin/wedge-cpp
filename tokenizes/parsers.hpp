@@ -14,7 +14,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "concepts"
+#include "combinators.hpp"
+#include "concepts.hpp"
 #include "either.hpp"
 #include "mappers.hpp"
 #include "primitive.hpp"
