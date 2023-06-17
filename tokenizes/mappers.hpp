@@ -2,6 +2,7 @@
 #include "concepts.hpp"
 #include "either.hpp"
 #include <concepts>
+#include <cstddef>
 #include <exception>
 #include <functional>
 #include <istream>
@@ -113,6 +114,48 @@ public:
             return result.into_right();
         case either_mode::left:
             return left<V>(value);
+        case either_mode::none:
+            throw std::range_error("none cannot map");
+        default:
+            throw std::domain_error("mode domain error");
+        }
+    }
+};
+
+template <parsable P>
+class eraser_right {
+    P parser;
+
+public:
+    eraser_right(const P &_parser) : parser(_parser) {}
+    either<std::nullptr_t, left_of<P>> operator()(std::istream &is) const {
+        either_of<P> result = parser(is);
+        switch (result.get_mode()) {
+        case either_mode::right:
+            return right<std::nullopt_t>(nullptr);
+        case either_mode::left:
+            return result.into_left();
+        case either_mode::none:
+            throw std::range_error("none cannot map");
+        default:
+            throw std::domain_error("mode domain error");
+        }
+    }
+};
+
+template <parsable P>
+class eraser_left {
+    P parser;
+
+public:
+    eraser_left(const P &_parser) : parser(_parser) {}
+    either<right_of<P>, std::nullptr_t> operator()(std::istream &is) const {
+        either_of<P> result = parser(is);
+        switch (result.get_mode()) {
+        case either_mode::right:
+            return result.into_right();
+        case either_mode::left:
+            return left<std::nullopt_t>(nullptr);
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:
