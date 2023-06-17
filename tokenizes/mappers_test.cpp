@@ -124,3 +124,25 @@ TEST(eraser_left, digit_fail) {
 }
 
 }; // namespace eraser_left_tests
+
+
+namespace recognition_tests {
+
+// right: char -> char, left: nullptr -> nullptr
+const static auto parser = recognition(digit);
+
+TEST(recognition, digit_success) {
+    std::stringstream ss;
+    
+    ss << "0";
+    EXPECT_EQ(parser(ss).opt_right(), "0");
+}
+
+TEST(recognition, digit_fail) {
+    std::stringstream ss;
+
+    ss << "x";
+    EXPECT_TRUE(parser(ss).is_left());
+}
+
+}; // namespace eraser_left_tests

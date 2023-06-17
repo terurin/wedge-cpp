@@ -7,6 +7,7 @@
 #include <functional>
 #include <istream>
 #include <optional>
+
 namespace tokenizes::mappers {
 
 using tokenizes::concepts::either_of;
@@ -185,6 +186,40 @@ public:
             return right(nullptr);
         case either_mode::left:
             return left(nullptr);
+        case either_mode::none:
+            throw std::range_error("none cannot map");
+        default:
+            throw std::domain_error("mode domain error");
+        }
+    }
+};
+
+template <parsable P>
+class recognition {
+    P parser;
+
+public:
+    recognition(const P &_parser) : parser(_parser) {}
+    recognition(P &&_parser) : parser(_parser) {}
+    either<std::string, left_of<P>> operator()(std::istream &is) const {
+        const std::streampos begin = is.tellg();
+        either_of<P> result = parser(is);
+        const std::streampos end = is.tellg();
+
+        switch (result.get_mode()) {
+        case either_mode::right: {
+            std::string buffer;
+            buffer.reserve(end - begin);
+
+            is.seekg(begin);
+            for (auto pos = is.tellg(); pos != end; pos = is.tellg()) {
+                buffer.push_back(is.get());
+            }
+
+            return right<std::string>(buffer);
+        }
+        case either_mode::left:
+            return result.into_left();
         case either_mode::none:
             throw std::range_error("none cannot map");
         default:
