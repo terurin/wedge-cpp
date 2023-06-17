@@ -92,10 +92,4 @@ auto operator*(const PX &r, const PY &l) {
     return sequencer<PX, PY>(r, l);
 }
 
-template <parsable PX, parsable PY>
-    requires std::same_as<left_of<PX>, left_of<PY>>
-auto operator*(PX &&r, PY &&l) {
-    return sequencer<PX, PY>(std::move(r), std::move(l));
-}
-
 } // namespace tokenizes::combinators

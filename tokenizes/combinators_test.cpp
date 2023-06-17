@@ -26,7 +26,7 @@ TEST(tupled_merge, type) {
 
 namespace sequencer_tests {
 
-const static auto parser = sequencer(digit, digit);
+const static auto parser = digit * digit;
 
 TEST(sequencer, right_failed) {
     stringstream ss;
@@ -49,7 +49,7 @@ TEST(sequencer, success) {
 } // namespace sequencer_tests
 
 namespace sequencer3_tests {
-const static auto parser = sequencer(digit, sequencer(digit, digit));
+const static auto parser = digit * digit * digit;
 
 TEST(sequencer, failed_0) {
     stringstream ss;
