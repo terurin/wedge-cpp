@@ -1,5 +1,5 @@
-#include "primitive.hpp"
 #include "concepts.hpp"
+#include "primitive.hpp"
 #include "gtest/gtest.h"
 #include <sstream>
 #include <string>
@@ -92,3 +92,44 @@ TEST(tag, concept) {
 }
 
 } // namespace tag_tests
+
+namespace tag_list_tests {
+
+const static tag_list parser{"hello", "hello_world", "hola"};
+
+TEST(tag_list, concept) {
+    using tokenizes::concepts::parsable;
+    EXPECT_TRUE(parsable<tag_list>);
+}
+
+TEST(tag_list, under_hello) {
+    std::stringstream ss;
+    ss << "hell";
+    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
+}
+
+TEST(tag_list, just_hello) {
+    std::stringstream ss;
+    ss << "hello";
+    EXPECT_EQ(parser(ss).opt_right(), "hello");
+}
+
+TEST(tag_list, over_hello) {
+    std::stringstream ss;
+    ss << "helloaa";
+    EXPECT_EQ(parser(ss).opt_right(), "hello");
+}
+
+TEST(tag_list, hello_world) {
+    std::stringstream ss;
+    ss << "hello_world";
+    EXPECT_EQ(parser(ss).opt_right(), "hello_world");
+}
+
+TEST(tag_list, hola) {
+    std::stringstream ss;
+    ss << "hola";
+    EXPECT_EQ(parser(ss).opt_right(), "hola");
+}
+
+} // namespace tag_list_tests
