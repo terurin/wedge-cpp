@@ -109,14 +109,14 @@ namespace eraser_left_tests {
 // right: char -> char, left: nullptr -> nullptr
 const static auto parser = eraser_left(digit);
 
-TEST(eraser_right, digit_success) {
+TEST(eraser_left, digit_success) {
     std::stringstream ss;
     
     ss << "0";
     EXPECT_EQ(parser(ss).opt_right(), '0');
 }
 
-TEST(eraser_right, digit_fail) {
+TEST(eraser_left, digit_fail) {
     std::stringstream ss;
 
     ss << "x";
