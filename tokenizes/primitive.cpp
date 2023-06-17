@@ -1,11 +1,17 @@
 #include "primitive.hpp"
-
+#include <iomanip>
+#include <map>
 namespace tokenizes::primitive {
 
 using tokenizes::eithers::left;
 using tokenizes::eithers::right;
 
-std::ostream &operator<<(std::ostream &os, const escaped_char &ec) {
+struct escaped_char {
+    char c;
+    escaped_char(char _c) : c(_c) {}
+};
+
+static std::ostream &operator<<(std::ostream &os, const escaped_char &ec) {
     const char c = ec.c;
 
     if (isgraph(c)) {
@@ -86,6 +92,57 @@ either<std::string, std::nullptr_t> tag::operator()(std::istream &ss) const {
         }
     }
     return right(str);
+}
+
+std::ostream &operator<<(std::ostream &os, const tag &t) {
+    os << "tag: " << std::quoted(t.get_str());
+
+    return os;
+}
+
+tag_list::tag_list(const std::vector<std::string> &list) {
+    for (const std::string &item : list) {
+        for (ssize_t i = 0; i < item.size(); i++) {
+            table.emplace(item.substr(0, i), false);
+        }
+        table.emplace(item.substr(0, item.size()), true);
+    }
+}
+
+tag_list::tag_list(std::initializer_list<std::string_view> list) {
+    for (std::string_view item : list) {
+        for (ssize_t i = 0; i < item.size(); i++) {
+            table.emplace(item.substr(0, i), false);
+        }
+        table.emplace(item.substr(0, item.size()), true);
+    }
+}
+
+either<std::string, nullptr_t> tag_list::operator()(std::istream &is) const { return left(nullptr); }
+
+std::ostream &operator<<(std::ostream &os, const tag_list &t) {
+
+    // convert from table to ordered table to read by human, O(n log(n))
+    std::map<std::string, bool> ordered_table;
+    for (const auto &[k, v] : t.get_table()) {
+        ordered_table[k] = v;
+    }
+
+    // output
+
+    os << "tag_list: {";
+    bool use_sep = false;
+    for (const auto &[k, v] : ordered_table) {
+        const char *boolean = v ? "true" : "false";
+        if (use_sep) {
+            os << ", ";
+        }
+
+        os << std::quoted(k) << ": " << boolean;
+        use_sep = true;
+    }
+    os << " }";
+    return os;
 }
 
 } // namespace tokenizes::primitive

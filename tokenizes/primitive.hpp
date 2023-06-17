@@ -3,18 +3,15 @@
 #include "either.hpp"
 #include <bitset>
 #include <cstddef>
+#include <initializer_list>
 #include <iostream>
+#include <string>
 #include <string_view>
+#include <unordered_map>
+#include <vector>
 namespace tokenizes::primitive {
 
 using tokenizes::eithers::either;
-
-struct escaped_char {
-    char c;
-    escaped_char(char _c) : c(_c) {}
-};
-
-std::ostream &operator<<(std::ostream &os, const escaped_char &ec);
 
 class atom {
     using chars_t = std::bitset<256>;
@@ -69,6 +66,23 @@ public:
     tag(std::string_view sv) : str(sv) {}
     tag &set(std::string_view sv) { return str = sv, *this; }
     either<std::string, std::nullptr_t> operator()(std::istream &ss) const;
+    const std::string &get_str() const { return str; }
 };
+
+std::ostream &operator<<(std::ostream &, const tag &);
+
+class tag_list {
+    std::unordered_map<std::string, bool> table;
+
+public:
+    tag_list(const std::vector<std::string> &list);
+    tag_list(std::initializer_list<std::string_view> list);
+
+    either<std::string, nullptr_t> operator()(std::istream &) const;
+
+    const std::unordered_map<std::string, bool> &get_table() const { return table; }
+};
+
+std::ostream &operator<<(std::ostream &, const tag_list &);
 
 } // namespace tokenizes::primitive
