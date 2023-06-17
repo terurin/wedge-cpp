@@ -27,4 +27,9 @@ TEST(sequencer, success) {
     ss << "00";
     EXPECT_EQ(parser(ss).opt_right(), std::make_tuple('0', '0'));
 }
+
 } // namespace sequencer_tests
+
+namespace sequencer3_tests {
+const static auto parser = sequencer(digit, sequencer(digit, digit));
+}
