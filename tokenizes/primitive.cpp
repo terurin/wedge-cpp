@@ -1,4 +1,5 @@
 #include "primitive.hpp"
+#include <algorithm>
 #include <iomanip>
 #include <map>
 namespace tokenizes::primitive {
@@ -105,8 +106,14 @@ tag_list::tag_list(const std::vector<std::string> &list) {
         for (ssize_t i = 0; i < item.size(); i++) {
             table.emplace(item.substr(0, i), false);
         }
-        table.emplace(item.substr(0, item.size()), true);
     }
+
+    size_t size = 0;
+    for (const std::string &item : list) {
+        table.insert_or_assign(item, true);
+        size = std::max(size, item.size());
+    }
+    buffer_size = size;
 }
 
 tag_list::tag_list(std::initializer_list<std::string_view> list) {
@@ -114,11 +121,73 @@ tag_list::tag_list(std::initializer_list<std::string_view> list) {
         for (ssize_t i = 0; i < item.size(); i++) {
             table.emplace(item.substr(0, i), false);
         }
-        table.emplace(item.substr(0, item.size()), true);
     }
+
+    size_t size = 0;
+    for (const std::string_view item : list) {
+        table.insert_or_assign(std::string(item), true);
+        size = std::max(size, item.size());
+    }
+    buffer_size = size;
 }
 
-either<std::string, nullptr_t> tag_list::operator()(std::istream &is) const { return left(nullptr); }
+either<std::string, nullptr_t> tag_list::operator()(std::istream &is) const {
+    std::string buffer;
+    buffer.reserve(buffer_size);
+
+    // rollback info
+    std::string matched;
+    matched.reserve(buffer_size);
+    ssize_t position = is.tellg();
+
+    // non-matched loop
+    do {
+        const int input = is.get();
+        if (input == -1) {
+            // rollback
+            is.seekg(position);
+            return left(nullptr);
+        }
+        buffer.push_back(static_cast<char>(input));
+        const auto iter = table.find(buffer);
+        if (iter == table.end()) {
+            // rollback
+            is.seekg(position);
+            return left(nullptr);
+        }
+
+        if (iter->second) {
+            // update rollback
+            position = is.tellg();
+            matched = iter->first;
+            break;
+        }
+        
+    } while (1);
+
+    // matched loop
+    do {
+        const int input = is.get();
+        if (input == -1) {
+            // rollback
+            is.seekg(position);
+            return right(matched);
+        }
+        buffer.push_back(static_cast<char>(input));
+        const auto iter = table.find(buffer);
+        if (iter == table.end()) {
+            // rollback
+            is.seekg(position);
+            return right(matched);
+        }
+
+        if (iter->second) {
+            // update rollback
+            position = is.tellg();
+            matched = iter->first;
+        }
+    } while (1);
+}
 
 std::ostream &operator<<(std::ostream &os, const tag_list &t) {
 

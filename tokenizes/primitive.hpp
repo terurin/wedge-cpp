@@ -73,6 +73,7 @@ std::ostream &operator<<(std::ostream &, const tag &);
 
 class tag_list {
     std::unordered_map<std::string, bool> table;
+    size_t buffer_size;
 
 public:
     tag_list(const std::vector<std::string> &list);
