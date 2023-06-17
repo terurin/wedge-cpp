@@ -106,7 +106,7 @@ private:
 public:
     constant_left(const P &_parser, V &&_value) : parser(_parser), value(_value) {}
 
-    either<V, left_of<P>> operator()(std::istream &is) const {
+    either<right_of<P>, V> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
         case either_mode::right:
