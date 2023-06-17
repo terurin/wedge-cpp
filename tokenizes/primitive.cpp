@@ -162,7 +162,7 @@ either<std::string, nullptr_t> tag_list::operator()(std::istream &is) const {
             matched = iter->first;
             break;
         }
-        
+
     } while (1);
 
     // matched loop
@@ -188,6 +188,8 @@ either<std::string, nullptr_t> tag_list::operator()(std::istream &is) const {
         }
     } while (1);
 }
+
+tag_list_builder tag_list::builder() { return tag_list_builder(); }
 
 std::ostream &operator<<(std::ostream &os, const tag_list &t) {
 

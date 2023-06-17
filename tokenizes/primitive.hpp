@@ -71,6 +71,7 @@ public:
 
 std::ostream &operator<<(std::ostream &, const tag &);
 
+class tag_list_builder;
 class tag_list {
     std::unordered_map<std::string, bool> table;
     size_t buffer_size;
@@ -78,12 +79,20 @@ class tag_list {
 public:
     tag_list(const std::vector<std::string> &list);
     tag_list(std::initializer_list<std::string_view> list);
-
     either<std::string, nullptr_t> operator()(std::istream &) const;
-
     const std::unordered_map<std::string, bool> &get_table() const { return table; }
+    static tag_list_builder builder();
 };
 
 std::ostream &operator<<(std::ostream &, const tag_list &);
+
+class tag_list_builder {
+    std::vector<std::string> items;
+
+public:
+    tag_list_builder() = default;
+    tag_list_builder &add(std::string_view item) { return items.emplace_back(item), *this; }
+    tag_list build() const { return tag_list(items); }
+};
 
 } // namespace tokenizes::primitive
