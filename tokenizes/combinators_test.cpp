@@ -51,6 +51,24 @@ TEST(sequencer, success) {
 namespace sequencer3_tests {
 const static auto parser = sequencer(digit, sequencer(digit, digit));
 
+TEST(sequencer, failed_0) {
+    stringstream ss;
+    ss << "xxx";
+    EXPECT_TRUE(parser(ss).is_left());
+}
+
+TEST(sequencer, failed_1) {
+    stringstream ss;
+    ss << "0xx";
+    EXPECT_TRUE(parser(ss).is_left());
+}
+
+TEST(sequencer, failed_2) {
+    stringstream ss;
+    ss << "00x";
+    EXPECT_TRUE(parser(ss).is_left());
+}
+
 TEST(sequencer, success) {
     stringstream ss;
     ss << "000";
