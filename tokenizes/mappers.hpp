@@ -29,6 +29,7 @@ private:
 
 public:
     mapper_right(const P &_parser, M &&_map) : parser(_parser), map(_map) {}
+    mapper_right(P &&_parser, M &&_map) : parser(_parser), map(_map) {}
     either<right_t, left_t> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -55,6 +56,8 @@ private:
 
 public:
     mapper_left(const P &_parser, M &&_map) : parser(_parser), map(_map) {}
+    mapper_left(P &&_parser, M &&_map) : parser(_parser), map(_map) {}
+
     either<right_t, left_t> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -80,6 +83,7 @@ private:
 
 public:
     constant_right(const P &_parser, V &&_value) : parser(_parser), value(_value) {}
+    constant_right(P &&_parser, V &&_value) : parser(_parser), value(_value) {}
 
     either<V, left_of<P>> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
@@ -106,6 +110,7 @@ private:
 
 public:
     constant_left(const P &_parser, V &&_value) : parser(_parser), value(_value) {}
+    constant_left(P &&_parser, V &&_value) : parser(_parser), value(_value) {}
 
     either<right_of<P>, V> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
@@ -128,6 +133,7 @@ class eraser_right {
 
 public:
     eraser_right(const P &_parser) : parser(_parser) {}
+    eraser_right(P &&_parser) : parser(_parser) {}
     either<std::nullptr_t, left_of<P>> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -149,6 +155,7 @@ class eraser_left {
 
 public:
     eraser_left(const P &_parser) : parser(_parser) {}
+    eraser_left(P &&_parser) : parser(_parser) {}
     either<right_of<P>, std::nullptr_t> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -170,6 +177,7 @@ class eraser_both {
 
 public:
     eraser_both(const P &_parser) : parser(_parser) {}
+    eraser_both(P &&_parser) : parser(_parser) {}
     either<std::nullptr_t, std::nullptr_t> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
