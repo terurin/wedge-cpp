@@ -164,4 +164,25 @@ public:
     }
 };
 
+template <parsable P>
+class eraser_both {
+    P parser;
+
+public:
+    eraser_both(const P &_parser) : parser(_parser) {}
+    either<std::nullptr_t, std::nullptr_t> operator()(std::istream &is) const {
+        either_of<P> result = parser(is);
+        switch (result.get_mode()) {
+        case either_mode::right:
+            return right(nullptr);
+        case either_mode::left:
+            return left(nullptr);
+        case either_mode::none:
+            throw std::range_error("none cannot map");
+        default:
+            throw std::domain_error("mode domain error");
+        }
+    }
+};
+
 } // namespace tokenizes::mappers
