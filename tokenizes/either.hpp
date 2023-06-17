@@ -200,7 +200,7 @@ public:
 
     // *-map
     template <std::invocable<const R &> F>
-    auto right_map(F &&func) {
+    auto map_right(F &&func) {
         using R2 = std::invoke_result_t<F, R>;
         using E = either<R2, L>;
         switch (mode) {
@@ -216,7 +216,7 @@ public:
     }
 
     template <std::invocable<const L &> F>
-    auto left_map(F &&func) {
+    auto map_left(F &&func) {
         using L2 = std::invoke_result_t<F, L>;
         using E = either<R, L2>;
         switch (mode) {

@@ -80,14 +80,14 @@ TEST(either, assign_right) {
     EXPECT_EQ(e.opt_right(), 1);
 }
 
-TEST(either, right_map) {
+TEST(either, map_right) {
     either<int, std::string> e = right(10);
-    auto f = e.right_map([](const int &x) { return x + 10; });
+    auto f = e.map_right([](const int &x) { return x + 10; });
     EXPECT_EQ(f.opt_right(), 20);
 }
 
-TEST(either, left_map) {
+TEST(either, map_left) {
     either<int, std::string> e = left<std::string>("a");
-    auto f = e.left_map([](const std::string &x) { return x + "b"; });
+    auto f = e.map_left([](const std::string &x) { return x + "b"; });
     EXPECT_EQ(f.opt_left(), "ab");
 }
