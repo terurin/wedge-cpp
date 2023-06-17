@@ -43,25 +43,26 @@ public:
     PX px;
     PY py;
 
+    using right_t = decltype([]() {
+        right_of<PX> dx;
+        right_of<PY> dy;
+        return tupled_merge(std::move(dx), std::move(dy));
+    }());
+    using left_t = left_of<PX>;
+    using either_t = either<right_t, left_t>;
+
 public:
     sequencer(const PX &_pr, const PY &_pl) : px(_pr), py(_pl) {}
     sequencer(PX &&_pr, PY &&_pl) : px(_pr), py(_pl) {}
 
-    auto operator()(std::istream &is) const {
-        // dummy
-        right_of<PX> dx;
-        right_of<PY> dy;
-        using right_t = decltype(tupled_merge(dx, dy));
-        using left_t = left_of<PX>;
-        using either_t = either<right_t, left_t>;
-
+    either_t operator()(std::istream &is) const {
         // right
         either_of<PX> r = px(is);
         switch (r.get_mode()) {
         case either_mode::right:
             break;
         case either_mode::left:
-            return either_t(r.into_left());
+            return r.into_left();
         case either_mode::none:
             throw std::range_error("none is unexpceted");
         default:
@@ -74,14 +75,14 @@ public:
         case either_mode::right:
             break;
         case either_mode::left:
-            return either_t(l.into_left());
+            return l.into_left();
         case either_mode::none:
             throw std::range_error("none is unexpceted");
         default:
             throw std::range_error("others is unexpceted");
         }
 
-        return either_t(right(tupled_merge(std::move(r.get_right()), std::move(l.get_right()))));
+        return right(tupled_merge(std::move(r.get_right()), std::move(l.get_right())));
     }
 };
 
