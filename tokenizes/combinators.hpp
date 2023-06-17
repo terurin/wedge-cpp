@@ -13,33 +13,55 @@ using tokenizes::eithers::either_mode;
 using tokenizes::eithers::left;
 using tokenizes::eithers::right;
 
+template <class X, class Y>
+std::tuple<X, Y> tupled_merge(X x, Y y) {
+    return std::make_tuple(x, y);
+}
+
+template <class... X, class Y>
+std::tuple<X..., Y> tupled_merge(std::tuple<X...> x, Y y) {
+    return std::tuple_cat(x, std::make_tuple(y));
+}
+
+template <class X, class... Y>
+std::tuple<X, Y...> tupled_merge(X x, std::tuple<Y...> y) {
+    return std::tuple_cat(std::make_tuple(x), y);
+}
+
+template <class... X, class... Y>
+std::tuple<X..., Y...> tupled_merge(std::tuple<X...> x, std::tuple<Y...> y) {
+    return std::tuple_cat(x, y);
+}
+
 template <parsable PX, parsable PY>
     requires std::same_as<left_of<PX>, left_of<PY>>
 class sequencer {
     using X = right_of<PX>;
     using Y = right_of<PY>;
-    using right_t = std::tuple<X, Y>;
-
-    using left_t = left_of<PX>;
-    using either_t = either<right_t, left_t>;
 
 public:
-    PX pr;
-    PY pl;
+    PX px;
+    PY py;
 
 public:
-    sequencer(const PX &_pr, const PY &_pl) : pr(_pr), pl(_pl) {}
-    sequencer(PX &&_pr, PY &&_pl) : pr(_pr), pl(_pl) {}
+    sequencer(const PX &_pr, const PY &_pl) : px(_pr), py(_pl) {}
+    sequencer(PX &&_pr, PY &&_pl) : px(_pr), py(_pl) {}
 
-    either_t operator()(std::istream &is) const {
+    auto operator()(std::istream &is) const {
+        // dummy
+        right_of<PX> dx;
+        right_of<PY> dy;
+        using right_t = decltype(tupled_merge(dx, dy));
+        using left_t = left_of<PX>;
+        using either_t = either<right_t, left_t>;
 
         // right
-        either_of<PX> r = pr(is);
+        either_of<PX> r = px(is);
         switch (r.get_mode()) {
         case either_mode::right:
             break;
         case either_mode::left:
-            return r.into_left();
+            return either_t(r.into_left());
         case either_mode::none:
             throw std::range_error("none is unexpceted");
         default:
@@ -47,19 +69,19 @@ public:
         }
 
         // left
-        either_of<PY> l = pl(is);
+        either_of<PY> l = py(is);
         switch (l.get_mode()) {
         case either_mode::right:
             break;
         case either_mode::left:
-            return l.into_left();
+            return either_t(l.into_left());
         case either_mode::none:
             throw std::range_error("none is unexpceted");
         default:
             throw std::range_error("others is unexpceted");
         }
 
-        return right<right_t>(std::make_tuple(std::move(r.get_right()), std::move(l.get_right())));
+        return either_t(right(tupled_merge(std::move(r.get_right()), std::move(l.get_right()))));
     }
 };
 
