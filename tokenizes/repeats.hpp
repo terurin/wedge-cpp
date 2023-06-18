@@ -94,4 +94,14 @@ static inline auto many1(const P &p) {
     return repeat<P, std::string>(p, 1);
 }
 
+template <class P>
+static inline auto some(const P &p) {
+    return repeat(p, 0, 1);
+}
+
+template <parsable_char P>
+static inline auto some(const P &p) {
+    return repeat<P, std::string>(p, 0, 1);
+}
+
 } // namespace tokenizes::repeats
