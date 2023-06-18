@@ -50,7 +50,7 @@ std::tuple<X..., Y...> typed_merge(std::tuple<X...> &&x, std::tuple<Y...> &&y) {
  * [T],T -> [T]
  * T,[T] -> [T]
  * [T],[T] -> [T]
-*/
+ */
 
 template <class X, class Y>
     requires std::same_as<X, Y>
@@ -126,13 +126,7 @@ static inline std::nullptr_t typed_merge(std::nullptr_t x, std::nullptr_t y) { r
 template <parsable PX, parsable PY>
     requires std::same_as<left_of<PX>, left_of<PY>>
 class sequencer {
-    using X = right_of<PX>;
-    using Y = right_of<PY>;
-
 public:
-    PX px;
-    PY py;
-
     using right_t = decltype([]() {
         right_of<PX> dx;
         right_of<PY> dy;
@@ -140,6 +134,10 @@ public:
     }());
     using left_t = left_of<PX>;
     using either_t = either<right_t, left_t>;
+
+private:
+    PX px;
+    PY py;
 
 public:
     sequencer(const PX &_pr, const PY &_pl) : px(_pr), py(_pl) {}
