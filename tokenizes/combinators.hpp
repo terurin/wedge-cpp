@@ -2,10 +2,12 @@
 #include "concepts.hpp"
 #include "either.hpp"
 #include <cstddef>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 #include <vector>
+
 namespace tokenizes::combinators {
 using tokenizes::concepts::either_of;
 using tokenizes::concepts::left_of;
@@ -16,7 +18,12 @@ using tokenizes::eithers::either_mode;
 using tokenizes::eithers::left;
 using tokenizes::eithers::right;
 
-// tuple version
+/** tuple version
+ * X,Y  -> (X, Y)
+ * Xs,Y -> (Xs,Y)
+ * Xs,Ys-> (X, Ys)
+ * Xs,Ys-> (Xs,Y)
+ * */
 
 template <class X, class Y>
 std::tuple<X, Y> typed_merge(X &&x, Y &&y) {
@@ -38,7 +45,12 @@ std::tuple<X..., Y...> typed_merge(std::tuple<X...> &&x, std::tuple<Y...> &&y) {
     return std::tuple_cat(std::move(x), std::move(y));
 }
 
-// vector version
+/** vector version
+ * T,T -> [T]
+ * [T],T -> [T]
+ * T,[T] -> [T]
+ * [T],[T] -> [T]
+*/
 
 template <class X, class Y>
     requires std::same_as<X, Y>
@@ -67,7 +79,12 @@ std::vector<X> typed_merge(std::vector<X> &&x, std::vector<Y> &&y) {
     return x;
 }
 
-// string version
+/** string version
+ * (char,  char)   -> string
+ * (string,char)   -> string
+ * (char,  string) -> string
+ * (string,string) -> string
+ */
 
 static inline std::string typed_merge(char x, char y) { return {x, y}; }
 
@@ -86,7 +103,11 @@ static inline std::string typed_merge(std::string &&x, std::string &&y) {
     return x;
 }
 
-// nullptr version
+/** nullptr version
+ * (nullptr,T      ) -> T
+ * (T,      nullptr) -> T
+ * (nullptr,nullptr) -> nullptr
+ */
 
 template <class T>
 static inline T typed_merge(T &&x, std::nullptr_t y) {
@@ -101,8 +122,6 @@ static inline T typed_merge(std::nullptr_t x, T &&y) {
 }
 
 static inline std::nullptr_t typed_merge(std::nullptr_t x, std::nullptr_t y) { return nullptr; }
-
-// template <class T>
 
 template <parsable PX, parsable PY>
     requires std::same_as<left_of<PX>, left_of<PY>>
