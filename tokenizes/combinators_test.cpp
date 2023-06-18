@@ -75,7 +75,7 @@ TEST(typed_merge, string_both) {
 
 } // namespace tupled_merge_tests
 
-namespace sequencer_tests {
+namespace sequencer2_tests {
 
 const static auto parser = digit * digit;
 
@@ -94,8 +94,7 @@ TEST(sequencer, left_failed) {
 TEST(sequencer, success) {
     stringstream ss;
     ss << "00";
-    EXPECT_TRUE(parser(ss).is_right());
-    // EXPECT_EQ(parser(ss).opt_right(),std::string("00"));
+    EXPECT_EQ(parser(ss).opt_right(), "00");
 }
 
 } // namespace sequencer_tests
@@ -124,7 +123,7 @@ TEST(sequencer, failed_2) {
 TEST(sequencer, success) {
     stringstream ss;
     ss << "000";
-    EXPECT_TRUE(parser(ss).is_right());
+    EXPECT_EQ(parser(ss).opt_right(), "000");
 }
 
 } // namespace sequencer3_tests
