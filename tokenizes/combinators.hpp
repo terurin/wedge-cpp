@@ -1,6 +1,7 @@
 #pragma once
 #include "concepts.hpp"
 #include "either.hpp"
+#include <cstddef>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -66,6 +67,8 @@ std::vector<X> typed_merge(std::vector<X> &&x, std::vector<Y> &&y) {
     return x;
 }
 
+// string version
+
 static inline std::string typed_merge(char x, char y) { return {x, y}; }
 
 static inline std::string typed_merge(std::string &&x, char y) {
@@ -82,6 +85,24 @@ static inline std::string typed_merge(std::string &&x, std::string &&y) {
     x.insert(x.end(), y.begin(), y.end());
     return x;
 }
+
+// nullptr version
+
+template <class T>
+static inline T typed_merge(T &&x, std::nullptr_t y) {
+    (void)y;
+    return x;
+}
+
+template <class T>
+static inline T typed_merge(std::nullptr_t x, T &&y) {
+    (void)x;
+    return y;
+}
+
+static inline std::nullptr_t typed_merge(std::nullptr_t x, std::nullptr_t y) { return nullptr; }
+
+// template <class T>
 
 template <parsable PX, parsable PY>
     requires std::same_as<left_of<PX>, left_of<PY>>

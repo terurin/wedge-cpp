@@ -10,17 +10,33 @@ using namespace tokenizes::combinators;
 
 namespace tupled_merge_tests {
 
+// tuple version
+
 TEST(typed_merge, tuple) {
     auto x = typed_merge(1, 'a');
-    auto yr = typed_merge(1, std::move(x));
-    auto yl = typed_merge(std::move(x), 1);
-    auto z = typed_merge(std::move(x), std::move(x));
-
     EXPECT_EQ(x, make_tuple(1, 'a'));
-    EXPECT_EQ(yr, make_tuple(1, 1, 'a'));
-    EXPECT_EQ(yl, make_tuple(1, 'a', 1));
-    EXPECT_EQ(z, make_tuple(1, 'a', 1, 'a'));
 }
+
+TEST(typed_merge, tuple_right) {
+    std::tuple<int, char> x{1, 'a'};
+    auto y = typed_merge(1, std::move(x));
+    EXPECT_EQ(y, make_tuple(1, 1, 'a'));
+}
+
+TEST(typed_merge, tuple_left) {
+    std::tuple<int, char> x{1, 'a'};
+    auto y = typed_merge(std::move(x), 1);
+    EXPECT_EQ(y, make_tuple(1, 'a', 1));
+}
+
+TEST(typed_merge, tuple_both) {
+    std::tuple<int, char> x{1, 'a'};
+    std::tuple<int, char> y{2, 'b'};
+    auto z = typed_merge(std::move(x), std::move(y));
+    EXPECT_EQ(z, make_tuple(1, 'a', 2, 'b'));
+}
+
+// vector version
 
 TEST(typed_merge, vector) {
     auto ax = typed_merge(1, 2);
@@ -50,6 +66,8 @@ TEST(typed_merge, vector_both) {
     EXPECT_EQ(z, w);
 }
 
+// string version
+
 TEST(typed_merge, string) {
     auto x = typed_merge('a', 'b');
     EXPECT_EQ(x, "ab");
@@ -71,6 +89,23 @@ TEST(typed_merge, string_both) {
     using std::string;
     auto x = typed_merge(string("ab"), string("cd"));
     EXPECT_EQ(x, "abcd");
+}
+
+// nullptr version
+
+TEST(typed_merge, nullptr_right) {
+    auto x = typed_merge(1, nullptr);
+    EXPECT_EQ(x, 1);
+}
+
+TEST(typed_merge, nullptr_left) {
+    auto x = typed_merge(nullptr, 1);
+    EXPECT_EQ(x, 1);
+}
+
+TEST(typed_merge, nullptr_both) {
+    auto x = typed_merge(nullptr, nullptr);
+    EXPECT_EQ(x, nullptr);
 }
 
 } // namespace tupled_merge_tests
@@ -97,7 +132,7 @@ TEST(sequencer, success) {
     EXPECT_EQ(parser(ss).opt_right(), "00");
 }
 
-} // namespace sequencer_tests
+} // namespace sequencer2_tests
 
 namespace sequencer3_tests {
 const static auto parser = digit * digit * digit;
