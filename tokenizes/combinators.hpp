@@ -2,7 +2,9 @@
 #include "concepts.hpp"
 #include "either.hpp"
 #include <stdexcept>
+#include <string>
 #include <tuple>
+#include <vector>
 namespace tokenizes::combinators {
 using tokenizes::concepts::either_of;
 using tokenizes::concepts::left_of;
@@ -13,24 +15,72 @@ using tokenizes::eithers::either_mode;
 using tokenizes::eithers::left;
 using tokenizes::eithers::right;
 
+// tuple version
+
 template <class X, class Y>
-std::tuple<X, Y> tupled_merge(X x, Y y) {
-    return std::make_tuple(x, y);
+std::tuple<X, Y> typed_merge(X &&x, Y &&y) {
+    return std::make_tuple(std::move(x), std::move(y));
 }
 
 template <class... X, class Y>
-std::tuple<X..., Y> tupled_merge(std::tuple<X...> x, Y y) {
-    return std::tuple_cat(x, std::make_tuple(y));
+std::tuple<X..., Y> typed_merge(std::tuple<X...> &&x, Y &&y) {
+    return std::tuple_cat(std::move(x), std::make_tuple(y));
 }
 
 template <class X, class... Y>
-std::tuple<X, Y...> tupled_merge(X x, std::tuple<Y...> y) {
-    return std::tuple_cat(std::make_tuple(x), y);
+std::tuple<X, Y...> typed_merge(X &&x, std::tuple<Y...> &&y) {
+    return std::tuple_cat(std::make_tuple(x), std::move(y));
 }
 
 template <class... X, class... Y>
-std::tuple<X..., Y...> tupled_merge(std::tuple<X...> x, std::tuple<Y...> y) {
-    return std::tuple_cat(x, y);
+std::tuple<X..., Y...> typed_merge(std::tuple<X...> &&x, std::tuple<Y...> &&y) {
+    return std::tuple_cat(std::move(x), std::move(y));
+}
+
+// vector version
+
+template <class X, class Y>
+    requires std::same_as<X, Y>
+std::vector<X> typed_merge(X &&x, Y &&y) {
+    return {x, y};
+}
+
+template <class X, class Y>
+    requires std::same_as<X, Y>
+std::vector<X> typed_merge(std::vector<X> &&x, Y &&y) {
+    x.push_back(y);
+    return x;
+}
+
+template <class X, class Y>
+    requires std::same_as<X, Y>
+std::vector<X> typed_merge(X &&x, std::vector<Y> &&y) {
+    y.insert(y.begin(), x);
+    return y;
+}
+
+template <class X, class Y>
+    requires std::same_as<X, Y>
+std::vector<X> typed_merge(std::vector<X> &&x, std::vector<Y> &&y) {
+    x.insert(x.end(), y.begin(), y.end());
+    return x;
+}
+
+static inline std::string typed_merge(char x, char y) { return {x, y}; }
+
+static inline std::string typed_merge(std::string &&x, char y) {
+    x.push_back(y);
+    return x;
+}
+
+static inline std::string typed_merge(char x, std::string &&y) {
+    y.insert(y.begin(), x);
+    return y;
+}
+
+static inline std::string typed_merge(std::string &&x, std::string &&y) {
+    x.insert(x.end(), y.begin(), y.end());
+    return x;
 }
 
 template <parsable PX, parsable PY>
@@ -46,7 +96,7 @@ public:
     using right_t = decltype([]() {
         right_of<PX> dx;
         right_of<PY> dy;
-        return tupled_merge(std::move(dx), std::move(dy));
+        return typed_merge(std::move(dx), std::move(dy));
     }());
     using left_t = left_of<PX>;
     using either_t = either<right_t, left_t>;
@@ -82,7 +132,7 @@ public:
             throw std::range_error("others is unexpceted");
         }
 
-        return right(tupled_merge(std::move(r.get_right()), std::move(l.get_right())));
+        return right(typed_merge(std::move(r.get_right()), std::move(l.get_right())));
     }
 };
 

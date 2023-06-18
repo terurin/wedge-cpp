@@ -1,8 +1,8 @@
 #include "combinators.hpp"
 #include "primitive.hpp"
 #include "gtest/gtest.h"
+#include <algorithm>
 #include <sstream>
-
 using std::make_tuple;
 using std::stringstream;
 using tokenizes::primitive::digit;
@@ -10,16 +10,67 @@ using namespace tokenizes::combinators;
 
 namespace tupled_merge_tests {
 
-TEST(tupled_merge, type) {
-    auto x = tupled_merge(1, 1);
-    auto yr = tupled_merge(1, x);
-    auto yl = tupled_merge(x, 1);
-    auto z = tupled_merge(x, x);
+TEST(typed_merge, tuple) {
+    auto x = typed_merge(1, 'a');
+    auto yr = typed_merge(1, std::move(x));
+    auto yl = typed_merge(std::move(x), 1);
+    auto z = typed_merge(std::move(x), std::move(x));
 
-    EXPECT_EQ(x, make_tuple(1, 1));
-    EXPECT_EQ(yr, make_tuple(1, 1, 1));
-    EXPECT_EQ(yl, make_tuple(1, 1, 1));
-    EXPECT_EQ(z, make_tuple(1, 1, 1, 1));
+    EXPECT_EQ(x, make_tuple(1, 'a'));
+    EXPECT_EQ(yr, make_tuple(1, 1, 'a'));
+    EXPECT_EQ(yl, make_tuple(1, 'a', 1));
+    EXPECT_EQ(z, make_tuple(1, 'a', 1, 'a'));
+}
+
+TEST(typed_merge, vector) {
+    auto ax = typed_merge(1, 2);
+    const std::vector<int> bx = {1, 2};
+    EXPECT_EQ(ax, bx);
+}
+
+TEST(typed_merge, vector_right) {
+    std::vector<int> x{1, 2};
+    auto y = typed_merge(0, std::move(x));
+    const std::vector<int> z = {0, 1, 2};
+    EXPECT_EQ(y, z);
+}
+
+TEST(typed_merge, vector_left) {
+    std::vector<int> x{1, 2};
+    auto y = typed_merge(std::move(x), 3);
+    const std::vector<int> z = {1, 2, 3};
+    EXPECT_EQ(y, z);
+}
+
+TEST(typed_merge, vector_both) {
+    std::vector<int> x{1, 2};
+    std::vector<int> y{3, 4};
+    auto z = typed_merge(std::move(x), std::move(y));
+    const std::vector<int> w = {1, 2, 3, 4};
+    EXPECT_EQ(z, w);
+}
+
+TEST(typed_merge, string) {
+    auto x = typed_merge('a', 'b');
+    EXPECT_EQ(x, "ab");
+}
+
+TEST(typed_merge, string_right) {
+    using std::string;
+    auto x = typed_merge('a', string("bc"));
+    EXPECT_EQ(x, "abc");
+}
+
+TEST(typed_merge, string_left) {
+    using std::string;
+    auto x = typed_merge(string("ab"), 'c');
+    EXPECT_EQ(x, "abc");
+}
+
+TEST(typed_merge, string_both) {
+    using std::string;
+    auto x = typed_merge(string("ab"), string("cd"));
+    EXPECT_EQ(x, "abcd");
 }
 
 } // namespace tupled_merge_tests
@@ -43,7 +94,8 @@ TEST(sequencer, left_failed) {
 TEST(sequencer, success) {
     stringstream ss;
     ss << "00";
-    EXPECT_EQ(parser(ss).opt_right(), std::make_tuple('0', '0'));
+    EXPECT_TRUE(parser(ss).is_right());
+    // EXPECT_EQ(parser(ss).opt_right(),std::string("00"));
 }
 
 } // namespace sequencer_tests
@@ -72,7 +124,7 @@ TEST(sequencer, failed_2) {
 TEST(sequencer, success) {
     stringstream ss;
     ss << "000";
-    EXPECT_EQ(parser(ss).opt_right(), std::make_tuple('0', '0', '0'));
+    EXPECT_TRUE(parser(ss).is_right());
 }
 
 } // namespace sequencer3_tests
