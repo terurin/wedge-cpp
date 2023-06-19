@@ -180,4 +180,57 @@ auto operator*(const PX &r, const PY &l) {
     return sequencer<PX, PY>(r, l);
 }
 
+template <parsable PX, parsable PY>
+    requires std::same_as<right_of<PX>, right_of<PY>>
+class branch {
+public:
+    using right_t = right_of<PX>;
+    using left_t = left_of<PY>;
+    using either_t = either<right_t, left_t>;
+
+private:
+    PX px;
+    PY py;
+
+public:
+    branch(const PX &_px, const PY &_py) : px(_px), py(_py) {}
+    branch(PX &&_px, PY &&_py) : px(_px), py(_py) {}
+    either_t operator()(std::istream &is) const {
+        const std::streampos pos = is.tellg();
+        {
+            either_t e = px(is);
+            switch (e.get_mode()) {
+            case either_mode::right:
+                return e.into_right();
+            case either_mode::left:
+                break;
+            case either_mode::none:
+                throw std::range_error("none is not support");
+            default:
+                throw std::domain_error("mode domain error");
+            }
+        }
+        is.seekg(pos);
+        {
+            either_t e = px(is);
+            switch (e.get_mode()) {
+            case either_mode::right:
+                return e.into_right();
+            case either_mode::left:
+                return e.into_left();
+            case either_mode::none:
+                throw std::range_error("none is not support");
+            default:
+                throw std::domain_error("mode domain error");
+            }
+        }
+    }
+};
+
+template <parsable PX, parsable PY>
+    requires std::same_as<right_of<PX>, right_of<PY>>
+branch<PX, PY> operator+(const PX &px, const PY &py) {
+    return branch(px, py);
+}
+
 } // namespace tokenizes::combinators
