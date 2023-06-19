@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <initializer_list>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -12,6 +13,8 @@
 namespace tokenizes::primitive {
 
 using tokenizes::eithers::either;
+using tokenizes::eithers::left;
+using tokenizes::eithers::right;
 
 class atom {
     using chars_t = std::bitset<256>;
@@ -93,6 +96,54 @@ public:
     tag_list_builder() = default;
     tag_list_builder &add(std::string_view item) { return items.emplace_back(item), *this; }
     tag_list build() const { return tag_list(items); }
+};
+
+// [0-(base-1)]+
+template <std::integral T = unsigned int>
+class number {
+    unsigned int base;
+
+    inline std::optional<T> digit(int d) {
+        if (base <= 10) {
+            if ('0' <= d && d < '0' + base) {
+                return d - '0';
+            }
+            return std::nullopt;
+
+        } else {
+            if ('0' <= d && d < '0' + 10) {
+                return d - '0';
+            }
+            if ('a' <= d && d < 'a' + base - 10) {
+                return d - 'a' + 0xa;
+            }
+            if ('A' <= d && d < 'A' + base - 10) {
+                return d - 'A' + 0xA;
+            }
+            return std::nullopt;
+        }
+    }
+
+public:
+    number(unsigned int _base = 10) : base(_base) {}
+    either<T, std::nullptr_t> operator()(std::istream &is) const {
+        T result = 0;
+        // first
+        if (const auto d = digit(is.peek()); d) {
+            result = *d;
+            is.ignore();
+        } else {
+            return left<std::nullptr_t>(nullptr);
+        }
+
+        // lasts
+        for (auto d = digit(is.peek()); d; d = digit(is.peek())) {
+            result = result * base + *d;
+            is.ignore();
+        }
+
+        return right<T>(result);
+    }
 };
 
 } // namespace tokenizes::primitive
