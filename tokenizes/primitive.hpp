@@ -103,13 +103,12 @@ template <std::integral T = unsigned int>
 class number {
     unsigned int base;
 
-    inline std::optional<T> digit(int d) {
+    inline std::optional<T> digit_parse(int d) const {
         if (base <= 10) {
             if ('0' <= d && d < '0' + base) {
                 return d - '0';
             }
             return std::nullopt;
-
         } else {
             if ('0' <= d && d < '0' + 10) {
                 return d - '0';
@@ -129,7 +128,7 @@ public:
     either<T, std::nullptr_t> operator()(std::istream &is) const {
         T result = 0;
         // first
-        if (const auto d = digit(is.peek()); d) {
+        if (const auto d = digit_parse(is.peek()); d) {
             result = *d;
             is.ignore();
         } else {
@@ -137,13 +136,14 @@ public:
         }
 
         // lasts
-        for (auto d = digit(is.peek()); d; d = digit(is.peek())) {
+        for (auto d = digit_parse(is.peek()); d; d = digit_parse(is.peek())) {
             result = result * base + *d;
             is.ignore();
         }
 
         return right<T>(result);
     }
+    unsigned int get_base() const { return base; }
 };
 
 } // namespace tokenizes::primitive
