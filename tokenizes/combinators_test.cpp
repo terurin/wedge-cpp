@@ -6,6 +6,7 @@
 using std::make_tuple;
 using std::stringstream;
 using tokenizes::primitive::digit;
+using tokenizes::primitive::sign;
 using namespace tokenizes::combinators;
 
 namespace tupled_merge_tests {
@@ -162,3 +163,25 @@ TEST(sequencer, success) {
 }
 
 } // namespace sequencer3_tests
+
+namespace branch_tests {
+const static auto parser = sign + digit;
+
+TEST(branch, sign) {
+    stringstream ss;
+    ss << "+";
+    EXPECT_EQ(parser(ss).opt_right(), '+');
+}
+
+TEST(branch, digit) {
+    stringstream ss;
+    ss << "0";
+    EXPECT_EQ(parser(ss).opt_right(), '0');
+}
+
+TEST(branch, others) {
+    stringstream ss;
+    ss << "x";
+    EXPECT_EQ(parser(ss).opt_right(),std::nullopt);
+}
+} // namespace branch_tests
