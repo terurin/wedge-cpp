@@ -2,7 +2,9 @@
 
 #include "either.hpp"
 #include <bitset>
+#include <cmath>
 #include <cstddef>
+#include <cstdio>
 #include <initializer_list>
 #include <iostream>
 #include <optional>
@@ -100,7 +102,7 @@ public:
 
 // [0-(base-1)]+
 template <std::integral T = unsigned int>
-class number {
+class digits {
     unsigned int base;
 
     inline std::optional<T> digit_parse(int d) const {
@@ -124,7 +126,7 @@ class number {
     }
 
 public:
-    number(unsigned int _base = 10) : base(_base) {}
+    digits(unsigned int _base = 10) : base(_base) {}
     either<T, std::nullptr_t> operator()(std::istream &is) const {
         T result = 0;
         // first
@@ -145,5 +147,10 @@ public:
     }
     unsigned int get_base() const { return base; }
 };
+
+template <std::integral T>
+static inline std::ostream &operator<<(std::ostream &os, const digits<T> &d) {
+    return os << "digits(" << d.get_base() << ")";
+}
 
 } // namespace tokenizes::primitive

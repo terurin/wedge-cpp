@@ -134,55 +134,55 @@ TEST(tag_list, hola) {
 
 } // namespace tag_list_tests
 
-namespace number_tests {
+namespace digits_tests {
 
-TEST(number, base8_pass) {
-    const auto parser = number(8);
+TEST(digits, base8_pass) {
+    const auto parser = digits(8);
     std::stringstream ss;
     ss << "17";
     EXPECT_EQ(parser(ss).opt_right(), 017);
 }
 
-TEST(number, base8_fail) {
-    const auto parser = number(8);
+TEST(digits, base8_fail) {
+    const auto parser = digits(8);
     std::stringstream ss;
     ss << "8";
     EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
 
-TEST(number, base10_pass) {
-    const auto parser = number();
+TEST(digits, base10_pass) {
+    const auto parser = digits();
     std::stringstream ss;
     ss << "10";
     EXPECT_EQ(parser(ss).opt_right(), 10);
 }
 
-TEST(number, base10_over) {
-    const auto parser = number();
+TEST(digits, base10_over) {
+    const auto parser = digits();
     std::stringstream ss;
     ss << "10#";
     EXPECT_EQ(parser(ss).opt_right(), 10);
 }
 
-TEST(number, base10_fail) {
-    const auto parser = number(8);
+TEST(digits, base10_fail) {
+    const auto parser = digits(8);
     std::stringstream ss;
     ss << "a";
     EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
 
-TEST(number, base16_pass) {
-    const auto parser = number(16);
+TEST(digits, base16_pass) {
+    const auto parser = digits(16);
     std::stringstream ss;
     ss << "1F";
     EXPECT_EQ(parser(ss).opt_right(), 0x1F);
 }
 
-TEST(number, base16_fail) {
-    const auto parser = number(16);
+TEST(digits, base16_fail) {
+    const auto parser = digits(16);
     std::stringstream ss;
     ss << "G";
     EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
 
-} // namespace number_tests
+} // namespace digits_tests
