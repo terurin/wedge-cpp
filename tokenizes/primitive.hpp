@@ -161,6 +161,16 @@ public:
     either<T, integer_errors> operator()(std::istream &is) const;
 };
 
+enum class quoted_errors { non_begin, non_end, failed_escape };
+
+class quoted_parser {
+    std::string quote;
+
+public:
+    quoted_parser(std::string_view _quote = "'") : quote(_quote) {}
+    either<std::string, quoted_errors> operator()(std::istream &is) const;
+};
+
 } // namespace tokenizes::primitive
 
 #include "primitive.cxx"

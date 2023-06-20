@@ -247,4 +247,8 @@ either<int, std::nullptr_t> digit_parser::operator()(std::istream &is) const {
 
 std::ostream &operator<<(std::ostream &os, const digit_parser &d) { return os << "digit(" << d.get_base() << ")"; }
 
+either<std::string, quoted_errors> quoted_parser::operator()(std::istream &is) const {
+    return left(quoted_errors::non_begin); // TODO: implement
+}
+
 } // namespace tokenizes::primitive
