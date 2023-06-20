@@ -134,6 +134,47 @@ TEST(tag_list, hola) {
 
 } // namespace tag_list_tests
 
+namespace digit_parser_tests {
+
+TEST(digit_parser, digit10_pass) {
+    const auto parser = unsigned_parser();
+    std::stringstream ss;
+    ss << "9";
+    const std::streampos pos = ss.tellg();
+    EXPECT_EQ(parser(ss).opt_right(), 9);
+    EXPECT_NE(pos, ss.tellg());
+}
+
+TEST(digit_parser, digit10_fail) {
+    const auto parser = unsigned_parser();
+    std::stringstream ss;
+    ss << "A";
+    const std::streampos pos = ss.tellg();
+    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
+    EXPECT_EQ(pos, ss.tellg());
+}
+
+
+TEST(digit_parser, digit16_pass) {
+    const auto parser = unsigned_parser(16);
+    std::stringstream ss;
+    ss << "F";
+    const std::streampos pos = ss.tellg();
+    EXPECT_EQ(parser(ss).opt_right(), 0xf);
+    EXPECT_NE(pos, ss.tellg());
+}
+
+TEST(digit_parser, digit16_fail) {
+    const auto parser = unsigned_parser(16);
+    std::stringstream ss;
+    ss << "G";
+    const std::streampos pos = ss.tellg();
+    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
+    EXPECT_EQ(pos, ss.tellg());
+}
+
+} // namespace digit_parser_tests
+
 namespace unsigned_parser_tests {
 
 TEST(unsigned_parser, base8_pass) {
@@ -185,4 +226,4 @@ TEST(unsigned_parser, base16_overflow) {
     EXPECT_EQ(parser(ss).opt_left(), unsigned_errors::overflow);
 }
 
-} // namespace digits_tests
+} // namespace unsigned_parser_tests

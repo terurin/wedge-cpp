@@ -216,24 +216,35 @@ std::ostream &operator<<(std::ostream &os, const tag_list &t) {
     return os;
 }
 
-std::optional<int> digit_parse(int base, int d) {
-    if (base <= 10) {
-        if ('0' <= d && d < '0' + base) {
-            return d - '0';
+either<int, std::nullptr_t> digit_parser::operator()(std::istream &is) const {
+    const unsigned int base = this->base;
+    const auto to_int = [base](int d) -> std::optional<int> {
+        if (base <= 10) {
+            if ('0' <= d && d < '0' + base) {
+                return d - '0';
+            }
+            return std::nullopt;
+        } else {
+            if ('0' <= d && d < '0' + 10) {
+                return d - '0';
+            }
+            if ('a' <= d && d < 'a' + base - 10) {
+                return d - 'a' + 0xa;
+            }
+            if ('A' <= d && d < 'A' + base - 10) {
+                return d - 'A' + 0xA;
+            }
+            return std::nullopt;
         }
-        return std::nullopt;
-    } else {
-        if ('0' <= d && d < '0' + 10) {
-            return d - '0';
-        }
-        if ('a' <= d && d < 'a' + base - 10) {
-            return d - 'a' + 0xa;
-        }
-        if ('A' <= d && d < 'A' + base - 10) {
-            return d - 'A' + 0xA;
-        }
-        return std::nullopt;
+    };
+
+    if (const auto x = to_int(is.peek()); x) {
+        is.ignore();
+        return right(*x);
     }
+    return left(nullptr);
 }
+
+std::ostream &operator<<(std::ostream &os, const digit_parser &d) { return os << "digit(" << d.get_base() << ")"; }
 
 } // namespace tokenizes::primitive
