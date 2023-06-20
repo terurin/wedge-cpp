@@ -430,3 +430,38 @@ TEST(integer_parser, base16_underflow_deny) {
 }
 
 } // namespace integer_parser_tests
+
+namespace quoted_parser_tests {
+const static auto parser = string_parser('\'');
+
+TEST(string_parser, not_begin) {
+    std::stringstream ss;
+    ss << "x";
+    EXPECT_EQ(parser(ss).opt_left(), string_errors::not_begin);
+}
+
+TEST(string_parser, hello) {
+    std::stringstream ss;
+    ss << "'hello'";
+    EXPECT_EQ(parser(ss).opt_right(), "hello");
+}
+
+TEST(string_parser, bad_escape) {
+    std::stringstream ss;
+    ss << "'\\p'";
+    EXPECT_EQ(parser(ss).opt_left(), string_errors::bad_escape);
+}
+
+TEST(string_parser, good_escape) {
+    std::stringstream ss;
+    ss << "'\\n'";
+    EXPECT_EQ(parser(ss).opt_right(), "\n");
+}
+
+TEST(string_parser, not_end) {
+    std::stringstream ss;
+    ss << "'a";
+    EXPECT_EQ(parser(ss).opt_left(), string_errors::not_end);
+}
+
+}

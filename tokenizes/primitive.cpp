@@ -247,8 +247,68 @@ either<int, std::nullptr_t> digit_parser::operator()(std::istream &is) const {
 
 std::ostream &operator<<(std::ostream &os, const digit_parser &d) { return os << "digit(" << d.get_base() << ")"; }
 
-either<std::string, quoted_errors> quoted_parser::operator()(std::istream &is) const {
-    return left(quoted_errors::non_begin); // TODO: implement
+static inline std::optional<char> escape(char c) {
+    switch (c) {
+    case 'a':
+        return '\a';
+    case 'b':
+        return '\b';
+    case 'f':
+        return '\f';
+    case 'n':
+        return '\n';
+    case 'r':
+        return '\r';
+    case 't':
+        return '\t';
+    case 'v':
+        return '\v';
+    case '?':
+        return '\?';
+    case '\'':
+        return '\'';
+    case '"':
+        return '"';
+    case '0':
+        return 0;
+    default:
+        return std::nullopt;
+    }
+}
+
+either<std::string, string_errors> string_parser::operator()(std::istream &is) const {
+    const std::streampos pos = is.tellg();
+
+    if (is.peek() != quote) {
+        return left(string_errors::not_begin);
+    }
+    is.ignore();
+
+    std::string result;
+    while (is) {
+        const int c = is.get();
+
+        if (c == quote) {
+            return right(result);
+        } else if (c == '\\') {
+            const int c2 = is.get();
+            if (c2 == -1) {
+                is.seekg(pos);
+                return left(string_errors::not_end);
+            }
+            const auto e = escape(c2);
+            if (!e) {
+                is.seekg(pos);
+                return left(string_errors::bad_escape);
+            }
+            result.push_back(*e);
+        } else {
+            result.push_back(c);
+        }
+    }
+
+    is.seekg(pos);
+    return left(string_errors::not_end);
 }
 
 } // namespace tokenizes::primitive
