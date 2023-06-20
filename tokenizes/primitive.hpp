@@ -189,6 +189,7 @@ public:
             if (sign) {
                 const T limit = std::numeric_limits<T>::min() - result;
                 if (result * (base - 1) - d < limit) {
+                    is.seekg(pos);
                     return left(signed_errors::underflow);
                 }
                 result = result * base - d;
@@ -196,6 +197,7 @@ public:
             } else {
                 const T limit = std::numeric_limits<T>::max() - result;
                 if (result * (base - 1) + d > limit) {
+                    is.seekg(pos);
                     return left(signed_errors::overflow);
                 }
                 result = result * base + d;
