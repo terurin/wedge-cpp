@@ -160,7 +160,7 @@ public:
 
 template <std::unsigned_integral T>
 static inline std::ostream &operator<<(std::ostream &os, const unsigned_parser<T> &d) {
-    return os << "digits(" << d.get_base() << ")";
+    return os << "unsigned(" << d.get_base() << ")";
 }
 
 enum class signed_parser_errors { not_digit, overflow, underflow };
@@ -181,6 +181,6 @@ public:
 
 template <std::signed_integral T>
 static inline std::ostream &operator<<(std::ostream &os, const signed_parser<T> &d) {
-    return os << "digits(" << d.get_base() << ")";
+    return os << "signed(" << d.get_base() << ")";
 }
 } // namespace tokenizes::primitive
