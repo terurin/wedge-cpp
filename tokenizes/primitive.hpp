@@ -104,7 +104,7 @@ enum class digits_error { overflow, not_digit };
 
 // [0-(base-1)]+
 template <std::unsigned_integral T = unsigned int>
-class digits {
+class unsigned_parser {
     unsigned int base;
 
     inline std::optional<T> digit_parse(int d) const {
@@ -128,7 +128,7 @@ class digits {
     }
 
 public:
-    digits(unsigned int _base = 10) : base(_base) {}
+    unsigned_parser(unsigned int _base = 10) : base(_base) {}
     either<T, digits_error> operator()(std::istream &is) const {
         using namespace std;
         T result = 0;
@@ -164,7 +164,7 @@ public:
 };
 
 template <std::integral T>
-static inline std::ostream &operator<<(std::ostream &os, const digits<T> &d) {
+static inline std::ostream &operator<<(std::ostream &os, const unsigned_parser<T> &d) {
     return os << "digits(" << d.get_base() << ")";
 }
 

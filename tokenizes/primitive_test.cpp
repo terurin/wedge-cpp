@@ -136,50 +136,50 @@ TEST(tag_list, hola) {
 
 namespace digits_tests {
 
-TEST(digits, base8_pass) {
-    const auto parser = digits(8);
+TEST(unsigned_parser, base8_pass) {
+    const auto parser = unsigned_parser(8);
     std::stringstream ss;
     ss << "17";
     EXPECT_EQ(parser(ss).opt_right(), 017);
 }
 
-TEST(digits, base8_not_digit) {
-    const auto parser = digits(8);
+TEST(unsigned_parser, base8_not_digit) {
+    const auto parser = unsigned_parser(8);
     std::stringstream ss;
     ss << "8";
     EXPECT_EQ(parser(ss).opt_left(), digits_error::not_digit);
 }
 
-TEST(digits, base10_pass) {
-    const auto parser = digits();
+TEST(unsigned_parser, base10_pass) {
+    const auto parser = unsigned_parser();
     std::stringstream ss;
     ss << "10";
     EXPECT_EQ(parser(ss).opt_right(), 10);
 }
 
-TEST(digits, base10_over) {
-    const auto parser = digits();
+TEST(unsigned_parser, base10_over) {
+    const auto parser = unsigned_parser();
     std::stringstream ss;
     ss << "10#";
     EXPECT_EQ(parser(ss).opt_right(), 10);
 }
 
-TEST(digits, base16_pass) {
-    const auto parser = digits(16);
+TEST(unsigned_parser, base16_pass) {
+    const auto parser = unsigned_parser(16);
     std::stringstream ss;
     ss << "1F";
     EXPECT_EQ(parser(ss).opt_right(), 0x1F);
 }
 
-TEST(digits, base16_not_digit) {
-    const auto parser = digits(16);
+TEST(unsigned_parser, base16_not_digit) {
+    const auto parser = unsigned_parser(16);
     std::stringstream ss;
     ss << "G";
     EXPECT_EQ(parser(ss).opt_left(), digits_error::not_digit);
 }
 
-TEST(digits, base16_overflow) {
-    const auto parser = digits<uint8_t>(16);
+TEST(unsigned_parser, base16_overflow) {
+    const auto parser = unsigned_parser<uint8_t>(16);
     std::stringstream ss;
     ss << "100";
     EXPECT_EQ(parser(ss).opt_left(), digits_error::overflow);
