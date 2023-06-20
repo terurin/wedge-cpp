@@ -121,33 +121,7 @@ class unsigned_parser {
 
 public:
     unsigned_parser(unsigned int _base = 10) : digit(_base) {}
-    either<T, unsigned_errors> operator()(std::istream &is) const {
-        using namespace std;
-        const std::streampos pos = is.tellg();
-        T result = 0;
-
-        // first
-        if (const either<int, nullptr_t> e = digit(is); e.is_right()) {
-            result = e.get_right();
-        } else {
-            return left(unsigned_errors::not_digit);
-        }
-
-        // lasts
-        const unsigned int base = get_base();
-        for (either<int, nullptr_t> e = digit(is); e.is_right(); e = digit(is)) {
-            const T limit = std::numeric_limits<T>::max() - result;
-            const int d = e.get_right();
-
-            // shift
-            if (result * (base - 1) + d > limit) {
-                is.seekg(pos);
-                return left(unsigned_errors::overflow);
-            }
-            result = result * base + d;
-        }
-        return right(result);
-    }
+    either<T, unsigned_errors> operator()(std::istream &is) const;
     unsigned int get_base() const { return digit.get_base(); }
 };
 
@@ -165,48 +139,7 @@ class signed_parser {
 
 public:
     signed_parser(unsigned int _base = 10) : digit(_base) {}
-    either<T, signed_errors> operator()(std::istream &is) const {
-        const std::streampos pos = is.tellg();
-
-        // [-+]?
-        bool sign = false;
-        if (const int s = is.peek(); s == '+' || s == '-') {
-            sign = s == '-';
-            is.ignore();
-        }
-
-        //[0-(base-1)]
-        T result = 0;
-        if (const either<int, std::nullptr_t> e = digit(is); e.is_right()) {
-            result = sign ? -e.get_right() : e.get_right();
-        } else {
-            return left(signed_errors::not_digit);
-        }
-
-        //[0-(base-1)]*
-        const unsigned int base = digit.get_base();
-        for (either<int, std::nullptr_t> e = digit(is); e.is_right(); e = digit(is)) {
-            const int d = e.get_right();
-            if (sign) {
-                const T limit = std::numeric_limits<T>::min() - result;
-                if (result * (base - 1) - d < limit) {
-                    is.seekg(pos);
-                    return left(signed_errors::underflow);
-                }
-                result = result * base - d;
-
-            } else {
-                const T limit = std::numeric_limits<T>::max() - result;
-                if (result * (base - 1) + d > limit) {
-                    is.seekg(pos);
-                    return left(signed_errors::overflow);
-                }
-                result = result * base + d;
-            }
-        }
-
-        return right(result);
-    }
+    either<T, signed_errors> operator()(std::istream &is) const;
     unsigned int get_base() const { return digit.get_base(); }
 };
 
