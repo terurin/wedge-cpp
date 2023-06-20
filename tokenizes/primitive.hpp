@@ -187,7 +187,10 @@ public:
         for (either<int, std::nullptr_t> e = digit(is); e.is_right(); e = digit(is)) {
             const int d = e.get_right();
             if (sign) {
-                // TODO: add implement
+                const T limit = std::numeric_limits<T>::min() - result;
+                if (result * (base - 1) - d < limit) {
+                    return left(signed_errors::underflow);
+                }
                 result = result * base - d;
 
             } else {

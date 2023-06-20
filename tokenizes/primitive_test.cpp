@@ -292,4 +292,18 @@ TEST(signed_parser, base16_overflow) {
     EXPECT_EQ(parser(ss).opt_left(), signed_errors::overflow);
 }
 
+TEST(signed_parser, base16_underflow_allow) {
+    const auto parser = signed_parser<int8_t>(16);
+    std::stringstream ss;
+    ss << "-80";
+    EXPECT_EQ(parser(ss).opt_left(), std::nullopt);
+}
+
+TEST(signed_parser, base16_underflow_deny) {
+    const auto parser = signed_parser<int8_t>(16);
+    std::stringstream ss;
+    ss << "-81";
+    EXPECT_EQ(parser(ss).opt_left(), signed_errors::underflow);
+}
+
 } // namespace signed_parser_tests
