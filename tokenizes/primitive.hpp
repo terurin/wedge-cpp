@@ -225,72 +225,9 @@ template <std::signed_integral T = int>
 class integer_parser {
 public:
     integer_parser() = default;
-    either<T, integer_errors> operator()(std::istream &is) const {
-        const std::streampos pos = is.tellg();
-        // [+-]?
-        bool sign = false;
-        if (const int s = is.peek(); s == '+' || s == '-') {
-            sign = s == '-';
-            is.ignore();
-        }
-
-        // attempt {0b,0q,0o,0d,0x}?
-        const int base = [](std::istream &is) -> int {
-            const std::streampos pos = is.tellg();
-            if (is.peek() != '0') {
-                return 10;
-            }
-            is.ignore();
-            switch (is.get()) {
-            case 'b':
-                return 2;
-            case 'q':
-                return 4;
-            case 'o':
-                return 8;
-            case 'd':
-                return 10;
-            case 'x':
-                return 16;
-            default:
-                is.seekg(pos);
-                return 10;
-            }
-        }(is);
-        const digit_parser digit(base);
-
-        // firts
-        T result = 0;
-
-        if (const either<int, std::nullptr_t> e = digit(is); e.is_right()) {
-            result = sign ? -e.get_right() : e.get_right();
-        } else {
-            return left(integer_errors::not_digit);
-        }
-
-        //[0-(base-1)]*
-        for (either<int, std::nullptr_t> e = digit(is); e.is_right(); e = digit(is)) {
-            const int d = e.get_right();
-            if (sign) {
-                const T limit = std::numeric_limits<T>::min() - result;
-                if (result * (base - 1) - d < limit) {
-                    is.seekg(pos);
-                    return left(integer_errors::underflow);
-                }
-                result = result * base - d;
-
-            } else {
-                const T limit = std::numeric_limits<T>::max() - result;
-                if (result * (base - 1) + d > limit) {
-                    is.seekg(pos);
-                    return left(integer_errors::overflow);
-                }
-                result = result * base + d;
-            }
-        }
-
-        return right(result);
-    }
+    either<T, integer_errors> operator()(std::istream &is) const;
 };
 
 } // namespace tokenizes::primitive
+
+#include "primitive.cxx"
