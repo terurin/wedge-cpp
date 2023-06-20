@@ -285,10 +285,17 @@ TEST(signed_parser, base16_not_digit) {
     EXPECT_EQ(parser(ss).opt_left(), signed_errors::not_digit);
 }
 
-TEST(signed_parser, base16_overflow) {
+TEST(signed_parser, base16_overflow_allow) {
     const auto parser = signed_parser<int8_t>(16);
     std::stringstream ss;
-    ss << "100";
+    ss << "7F";
+    EXPECT_EQ(parser(ss).opt_left(), std::nullopt);
+}
+
+TEST(signed_parser, base16_overflow_deny) {
+    const auto parser = signed_parser<int8_t>(16);
+    std::stringstream ss;
+    ss << "80";
     EXPECT_EQ(parser(ss).opt_left(), signed_errors::overflow);
 }
 
