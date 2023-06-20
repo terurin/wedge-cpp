@@ -216,4 +216,24 @@ std::ostream &operator<<(std::ostream &os, const tag_list &t) {
     return os;
 }
 
+std::optional<int> digit_parse(int base, int d) {
+    if (base <= 10) {
+        if ('0' <= d && d < '0' + base) {
+            return d - '0';
+        }
+        return std::nullopt;
+    } else {
+        if ('0' <= d && d < '0' + 10) {
+            return d - '0';
+        }
+        if ('a' <= d && d < 'a' + base - 10) {
+            return d - 'a' + 0xa;
+        }
+        if ('A' <= d && d < 'A' + base - 10) {
+            return d - 'A' + 0xA;
+        }
+        return std::nullopt;
+    }
+}
+
 } // namespace tokenizes::primitive

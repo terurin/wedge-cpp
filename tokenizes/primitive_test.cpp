@@ -134,7 +134,7 @@ TEST(tag_list, hola) {
 
 } // namespace tag_list_tests
 
-namespace digits_tests {
+namespace unsigned_parser_tests {
 
 TEST(unsigned_parser, base8_pass) {
     const auto parser = unsigned_parser(8);

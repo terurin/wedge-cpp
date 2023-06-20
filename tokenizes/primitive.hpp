@@ -102,30 +102,12 @@ public:
 
 enum class unsigned_errors { overflow, not_digit };
 
+std::optional<int> digit_parse(int base, int d);
+
 // [0-(base-1)]+
 template <std::unsigned_integral T = unsigned int>
 class unsigned_parser {
     unsigned int base;
-
-    inline std::optional<T> digit_parse(int d) const {
-        if (base <= 10) {
-            if ('0' <= d && d < '0' + base) {
-                return d - '0';
-            }
-            return std::nullopt;
-        } else {
-            if ('0' <= d && d < '0' + 10) {
-                return d - '0';
-            }
-            if ('a' <= d && d < 'a' + base - 10) {
-                return d - 'a' + 0xa;
-            }
-            if ('A' <= d && d < 'A' + base - 10) {
-                return d - 'A' + 0xA;
-            }
-            return std::nullopt;
-        }
-    }
 
 public:
     unsigned_parser(unsigned int _base = 10) : base(_base) {}
@@ -135,7 +117,7 @@ public:
         T result = 0;
 
         // first
-        if (const auto d = digit_parse(is.peek()); d) {
+        if (const auto d = digit_parse(base, is.peek()); d) {
             result = (int)*d;
             is.ignore();
         } else {
@@ -143,7 +125,7 @@ public:
         }
 
         // lasts
-        for (auto d = digit_parse(is.peek()); d; d = digit_parse(is.peek())) {
+        for (auto d = digit_parse(base, is.peek()); d; d = digit_parse(base, is.peek())) {
             const T limit = std::numeric_limits<T>::max() - result;
             // shift
             if (result * (base - 1) + *d > limit) {
@@ -173,9 +155,11 @@ class signed_parser {
 public:
     signed_parser(unsigned int _base) : base(_base) {}
 
-    either<T, signed_parser_errors> operator()(std::istream &is) const {
-        return left(signed_parser_errors::not_digit); // TODO: implement }
-    }
+    // either<T, signed_parser_errors> operator()(std::istream &is) const {
+    //     const std::streampos pos = is.tellg();
+
+    //     bool sign = false;
+    // }
     unsigned int get_base() const { return base; }
 };
 
