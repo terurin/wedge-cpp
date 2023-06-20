@@ -314,3 +314,119 @@ TEST(signed_parser, base16_underflow_deny) {
 }
 
 } // namespace signed_parser_tests
+
+namespace integer_parser_tests {
+
+TEST(integer_parser, base2_pass) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "0b1";
+    EXPECT_EQ(parser(ss).opt_right(), 1);
+}
+
+TEST(integer_parser, base2_not_digit) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "0b2";
+    EXPECT_EQ(parser(ss).opt_left(), integer_errors::not_digit);
+}
+
+TEST(integer_parser, base4_pass) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "0q3";
+    EXPECT_EQ(parser(ss).opt_right(), 3);
+}
+
+TEST(integer_parser, base4_not_digit) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "0b4";
+    EXPECT_EQ(parser(ss).opt_left(), integer_errors::not_digit);
+}
+
+TEST(integer_parser, base8_pass) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "0o7";
+    EXPECT_EQ(parser(ss).opt_right(), 1);
+}
+
+TEST(integer_parser, base8_not_digit) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "0o8";
+    EXPECT_EQ(parser(ss).opt_left(), integer_errors::not_digit);
+}
+
+TEST(integer_parser, base10_pass) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "10";
+    EXPECT_EQ(parser(ss).opt_right(), 10);
+}
+
+TEST(integer_parser, base10_plus) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "+10";
+    EXPECT_EQ(parser(ss).opt_right(), 10);
+}
+
+TEST(integer_parser, base10_minus) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "-10";
+    EXPECT_EQ(parser(ss).opt_right(), -10);
+}
+
+TEST(integer_parser, base10_over) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "10#";
+    EXPECT_EQ(parser(ss).opt_right(), 10);
+}
+
+TEST(integer_parser, base16_pass) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "1F";
+    EXPECT_EQ(parser(ss).opt_right(), 0x1F);
+}
+
+TEST(integer_parser, base16_not_digit) {
+    const auto parser = integer_parser();
+    std::stringstream ss;
+    ss << "G";
+    EXPECT_EQ(parser(ss).opt_left(), integer_errors::not_digit);
+}
+
+TEST(integer_parser, base16_overflow_allow) {
+    const auto parser = integer_parser<int8_t>();
+    std::stringstream ss;
+    ss << "7F";
+    EXPECT_EQ(parser(ss).opt_left(), std::nullopt);
+}
+
+TEST(integer_parser, base16_overflow_deny) {
+    const auto parser = integer_parser<int8_t>();
+    std::stringstream ss;
+    ss << "80";
+    EXPECT_EQ(parser(ss).opt_left(), integer_errors::overflow);
+}
+
+TEST(integer_parser, base16_underflow_allow) {
+    const auto parser = integer_parser<int8_t>();
+    std::stringstream ss;
+    ss << "-80";
+    EXPECT_EQ(parser(ss).opt_left(), std::nullopt);
+}
+
+TEST(integer_parser, base16_underflow_deny) {
+    const auto parser = integer_parser<int8_t>();
+    std::stringstream ss;
+    ss << "-81";
+    EXPECT_EQ(parser(ss).opt_left(), integer_errors::underflow);
+}
+
+} // namespace integer_parser_tests
