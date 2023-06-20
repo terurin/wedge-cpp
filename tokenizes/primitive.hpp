@@ -211,4 +211,17 @@ template <std::signed_integral T>
 static inline std::ostream &operator<<(std::ostream &os, const signed_parser<T> &d) {
     return os << "signed(" << d.get_base() << ")";
 }
+
+enum class integer_errors {
+    not_digit,
+    overflow,
+    underflow,
+};
+
+template <std::signed_integral T>
+class integer_parser {
+    integer_parser() = default;
+    either<T, integer_errors> operator()(std::istream &is) const { return left(integer_errors::not_digit); }
+};
+
 } // namespace tokenizes::primitive
