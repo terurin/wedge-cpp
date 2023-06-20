@@ -250,6 +250,20 @@ TEST(signed_parser, base10_pass) {
     EXPECT_EQ(parser(ss).opt_right(), 10);
 }
 
+TEST(signed_parser, base10_plus) {
+    const auto parser = signed_parser();
+    std::stringstream ss;
+    ss << "+10";
+    EXPECT_EQ(parser(ss).opt_right(), 10);
+}
+
+TEST(signed_parser, base10_minus) {
+    const auto parser = signed_parser();
+    std::stringstream ss;
+    ss << "-10";
+    EXPECT_EQ(parser(ss).opt_right(), -10);
+}
+
 TEST(signed_parser, base10_over) {
     const auto parser = signed_parser();
     std::stringstream ss;
