@@ -143,15 +143,14 @@ public:
         }
 
         // lasts
-        T limit = std::numeric_limits<T>::max() - result;
         bool is_overflowed = false;
         for (auto d = digit_parse(is.peek()); d; d = digit_parse(is.peek())) {
+            const T limit = std::numeric_limits<T>::max() - result;
             // shift
             if (result * (base - 1) + *d > limit) {
                 is_overflowed = true;
             }
             result = result * base + *d;
-            limit = std::numeric_limits<T>::max() - result;
             cout << (unsigned int)result << "," << (unsigned int)limit << endl;
 
             is.ignore();
