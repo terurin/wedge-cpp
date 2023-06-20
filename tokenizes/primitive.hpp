@@ -131,32 +131,27 @@ public:
     unsigned_parser(unsigned int _base = 10) : base(_base) {}
     either<T, digits_error> operator()(std::istream &is) const {
         using namespace std;
+        const std::streampos pos = is.tellg();
         T result = 0;
 
         // first
         if (const auto d = digit_parse(is.peek()); d) {
             result = (int)*d;
-
             is.ignore();
         } else {
             return left(digits_error::not_digit);
         }
 
         // lasts
-        bool is_overflowed = false;
         for (auto d = digit_parse(is.peek()); d; d = digit_parse(is.peek())) {
             const T limit = std::numeric_limits<T>::max() - result;
             // shift
             if (result * (base - 1) + *d > limit) {
-                is_overflowed = true;
+                is.seekg(pos);
+                return left(digits_error::overflow);
             }
             result = result * base + *d;
-            cout << (unsigned int)result << "," << (unsigned int)limit << endl;
-
             is.ignore();
-        }
-        if (is_overflowed) {
-            return left(digits_error::overflow);
         }
         return right(result);
     }
