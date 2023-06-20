@@ -100,7 +100,7 @@ public:
     tag_list build() const { return tag_list(items); }
 };
 
-enum class digits_error { overflow, not_digit };
+enum class unsigned_errors { overflow, not_digit };
 
 // [0-(base-1)]+
 template <std::unsigned_integral T = unsigned int>
@@ -129,7 +129,7 @@ class unsigned_parser {
 
 public:
     unsigned_parser(unsigned int _base = 10) : base(_base) {}
-    either<T, digits_error> operator()(std::istream &is) const {
+    either<T, unsigned_errors> operator()(std::istream &is) const {
         using namespace std;
         const std::streampos pos = is.tellg();
         T result = 0;
@@ -139,7 +139,7 @@ public:
             result = (int)*d;
             is.ignore();
         } else {
-            return left(digits_error::not_digit);
+            return left(unsigned_errors::not_digit);
         }
 
         // lasts
@@ -148,7 +148,7 @@ public:
             // shift
             if (result * (base - 1) + *d > limit) {
                 is.seekg(pos);
-                return left(digits_error::overflow);
+                return left(unsigned_errors::overflow);
             }
             result = result * base + *d;
             is.ignore();

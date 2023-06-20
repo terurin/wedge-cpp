@@ -147,7 +147,7 @@ TEST(unsigned_parser, base8_not_digit) {
     const auto parser = unsigned_parser(8);
     std::stringstream ss;
     ss << "8";
-    EXPECT_EQ(parser(ss).opt_left(), digits_error::not_digit);
+    EXPECT_EQ(parser(ss).opt_left(), unsigned_errors::not_digit);
 }
 
 TEST(unsigned_parser, base10_pass) {
@@ -175,15 +175,14 @@ TEST(unsigned_parser, base16_not_digit) {
     const auto parser = unsigned_parser(16);
     std::stringstream ss;
     ss << "G";
-    EXPECT_EQ(parser(ss).opt_left(), digits_error::not_digit);
+    EXPECT_EQ(parser(ss).opt_left(), unsigned_errors::not_digit);
 }
 
 TEST(unsigned_parser, base16_overflow) {
     const auto parser = unsigned_parser<uint8_t>(16);
     std::stringstream ss;
     ss << "100";
-    EXPECT_EQ(parser(ss).opt_left(), digits_error::overflow);
+    EXPECT_EQ(parser(ss).opt_left(), unsigned_errors::overflow);
 }
-
 
 } // namespace digits_tests
