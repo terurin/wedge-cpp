@@ -154,7 +154,6 @@ TEST(digit_parser, digit10_fail) {
     EXPECT_EQ(pos, ss.tellg());
 }
 
-
 TEST(digit_parser, digit16_pass) {
     const auto parser = unsigned_parser(16);
     std::stringstream ss;
@@ -227,3 +226,56 @@ TEST(unsigned_parser, base16_overflow) {
 }
 
 } // namespace unsigned_parser_tests
+
+namespace signed_parser_tests {
+
+TEST(signed_parser, base8_pass) {
+    const auto parser = signed_parser(8);
+    std::stringstream ss;
+    ss << "17";
+    EXPECT_EQ(parser(ss).opt_right(), 017);
+}
+
+TEST(signed_parser, base8_not_digit) {
+    const auto parser = signed_parser(8);
+    std::stringstream ss;
+    ss << "8";
+    EXPECT_EQ(parser(ss).opt_left(), signed_errors::not_digit);
+}
+
+TEST(signed_parser, base10_pass) {
+    const auto parser = signed_parser();
+    std::stringstream ss;
+    ss << "10";
+    EXPECT_EQ(parser(ss).opt_right(), 10);
+}
+
+TEST(signed_parser, base10_over) {
+    const auto parser = signed_parser();
+    std::stringstream ss;
+    ss << "10#";
+    EXPECT_EQ(parser(ss).opt_right(), 10);
+}
+
+TEST(signed_parser, base16_pass) {
+    const auto parser = signed_parser(16);
+    std::stringstream ss;
+    ss << "1F";
+    EXPECT_EQ(parser(ss).opt_right(), 0x1F);
+}
+
+TEST(signed_parser, base16_not_digit) {
+    const auto parser = signed_parser(16);
+    std::stringstream ss;
+    ss << "G";
+    EXPECT_EQ(parser(ss).opt_left(), signed_errors::not_digit);
+}
+
+TEST(signed_parser, base16_overflow) {
+    const auto parser = signed_parser<int8_t>(16);
+    std::stringstream ss;
+    ss << "100";
+    EXPECT_EQ(parser(ss).opt_left(), signed_errors::overflow);
+}
+
+} // namespace signed_parser_tests

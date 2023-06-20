@@ -137,7 +137,7 @@ public:
         for (either<int, nullptr_t> e = digit(is); e.is_right(); e = digit(is)) {
             const T limit = std::numeric_limits<T>::max() - result;
             const int d = e.get_right();
-            
+
             // shift
             if (result * (base - 1) + d > limit) {
                 is.seekg(pos);
@@ -155,22 +155,48 @@ static inline std::ostream &operator<<(std::ostream &os, const unsigned_parser<T
     return os << "unsigned(" << d.get_base() << ")";
 }
 
-enum class signed_parser_errors { not_digit, overflow, underflow };
+enum class signed_errors { not_digit, overflow, underflow };
 
 // [-+]?[0-(base-1)]+
-template <std::signed_integral T>
+template <std::signed_integral T = signed int>
 class signed_parser {
-    unsigned int base;
+    digit_parser digit;
 
 public:
-    signed_parser(unsigned int _base) : base(_base) {}
+    signed_parser(unsigned int _base = 10) : digit(_base) {}
+    either<T, signed_errors> operator()(std::istream &is) const {
+        const std::streampos pos = is.tellg();
 
-    // either<T, signed_parser_errors> operator()(std::istream &is) const {
-    //     const std::streampos pos = is.tellg();
+        // [-+]?
+        bool sign = false;
+        if (const int s = is.peek(); s == '+' || s == '-') {
+            sign = s == '-';
+            is.ignore();
+        }
 
-    //     bool sign = false;
-    // }
-    unsigned int get_base() const { return base; }
+        //[0-(base-1)]
+        T result = 0;
+        if (const either<int, std::nullptr_t> e = digit(is); e.is_right()) {
+            result = sign ? -e.get_right() : e.get_right();
+        } else {
+            return left(signed_errors::not_digit);
+        }
+
+        //[0-(base-1)]*
+        const unsigned int base = digit.get_base();
+        for (either<int, std::nullptr_t> e = digit(is); e.is_right(); e = digit(is)) {
+            const int d = e.get_right();
+            if (sign) {
+                result = result * base - d;
+            } else {
+                result = result * base + d;
+            }
+            //TODO: implement overflow&underflow
+        }
+
+        return right(result);
+    }
+    unsigned int get_base() const { return digit.get_base(); }
 };
 
 template <std::signed_integral T>
