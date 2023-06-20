@@ -163,12 +163,29 @@ public:
     unsigned int get_base() const { return base; }
 };
 
-template <std::integral T>
+template <std::unsigned_integral T>
 static inline std::ostream &operator<<(std::ostream &os, const unsigned_parser<T> &d) {
     return os << "digits(" << d.get_base() << ")";
 }
 
-template <std::integral T>
-class integer {};
+enum class signed_parser_errors { not_digit, overflow, underflow };
 
+// [-+]?[0-(base-1)]+
+template <std::signed_integral T>
+class signed_parser {
+    unsigned int base;
+
+public:
+    signed_parser(unsigned int _base) : base(_base) {}
+
+    either<T, signed_parser_errors> operator()(std::istream &is) const {
+        return left(signed_parser_errors::not_digit); // TODO: implement }
+    }
+    unsigned int get_base() const { return base; }
+};
+
+template <std::signed_integral T>
+static inline std::ostream &operator<<(std::ostream &os, const signed_parser<T> &d) {
+    return os << "digits(" << d.get_base() << ")";
+}
 } // namespace tokenizes::primitive
