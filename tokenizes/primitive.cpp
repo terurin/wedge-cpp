@@ -311,4 +311,24 @@ either<std::string, string_errors> string_parser::operator()(std::istream &is) c
     return left(string_errors::not_end);
 }
 
+either<std::string, raw_string_errors> raw_string_parser::operator()(std::istream &is) const {
+    const std::streampos pos = is.tellg();
+
+    // head
+    if (quote(is).is_left()) {
+        return left(raw_string_errors::not_begin);
+    }
+
+    std::string result;
+    while (is) {
+        if (quote(is).is_right()) {
+            return right(result);
+        }
+        result.push_back(is.get());
+    }
+
+    is.seekg(pos);
+    return left(raw_string_errors::not_end);
+}
+
 } // namespace tokenizes::primitive

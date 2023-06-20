@@ -431,7 +431,7 @@ TEST(integer_parser, base16_underflow_deny) {
 
 } // namespace integer_parser_tests
 
-namespace quoted_parser_tests {
+namespace string_parser_tests {
 const static auto parser = string_parser('\'');
 
 TEST(string_parser, not_begin) {
@@ -464,4 +464,27 @@ TEST(string_parser, not_end) {
     EXPECT_EQ(parser(ss).opt_left(), string_errors::not_end);
 }
 
+} // namespace string_parser_tests
+
+namespace raw_string_parser_tests {
+const static auto parser = raw_string_parser();
+
+TEST(raw_string_parser, not_begin) {
+    std::stringstream ss;
+    ss << "x";
+    EXPECT_EQ(parser(ss).opt_left(), raw_string_errors::not_begin);
 }
+
+TEST(raw_string_parser, hello) {
+    std::stringstream ss;
+    ss << "\"\"\"hello\"\"\"";
+    EXPECT_EQ(parser(ss).opt_right(), "hello");
+}
+
+TEST(raw_string_parser, not_end) {
+    std::stringstream ss;
+    ss << "\"\"\"a";
+    EXPECT_EQ(parser(ss).opt_left(), raw_string_errors::not_end);
+}
+
+} // namespace raw_string_parser_tests

@@ -171,6 +171,16 @@ public:
     either<std::string, string_errors> operator()(std::istream &is) const;
 };
 
+enum class raw_string_errors { not_begin, not_end };
+
+class raw_string_parser {
+    tag quote;
+
+public:
+    raw_string_parser(std::string_view _quote = "\"\"\"") : quote(_quote) {}
+    either<std::string, raw_string_errors> operator()(std::istream &is) const;
+};
+
 } // namespace tokenizes::primitive
 
 #include "primitive.cxx"
