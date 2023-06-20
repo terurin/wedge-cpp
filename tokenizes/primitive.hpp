@@ -100,8 +100,10 @@ public:
     tag_list build() const { return tag_list(items); }
 };
 
+enum class digits_error { overflow, not_digit };
+
 // [0-(base-1)]+
-template <std::integral T = unsigned int>
+template <std::unsigned_integral T = unsigned int>
 class digits {
     unsigned int base;
 
@@ -127,23 +129,37 @@ class digits {
 
 public:
     digits(unsigned int _base = 10) : base(_base) {}
-    either<T, std::nullptr_t> operator()(std::istream &is) const {
+    either<T, digits_error> operator()(std::istream &is) const {
+        using namespace std;
         T result = 0;
+
         // first
         if (const auto d = digit_parse(is.peek()); d) {
-            result = *d;
+            result = (int)*d;
+
             is.ignore();
         } else {
-            return left<std::nullptr_t>(nullptr);
+            return left(digits_error::not_digit);
         }
 
         // lasts
+        T limit = std::numeric_limits<T>::max() - result;
+        bool is_overflowed = false;
         for (auto d = digit_parse(is.peek()); d; d = digit_parse(is.peek())) {
+            // shift
+            if (result * (base - 1) + *d > limit) {
+                is_overflowed = true;
+            }
             result = result * base + *d;
+            limit = std::numeric_limits<T>::max() - result;
+            cout << (unsigned int)result << "," << (unsigned int)limit << endl;
+
             is.ignore();
         }
-
-        return right<T>(result);
+        if (is_overflowed) {
+            return left(digits_error::overflow);
+        }
+        return right(result);
     }
     unsigned int get_base() const { return base; }
 };
@@ -152,5 +168,8 @@ template <std::integral T>
 static inline std::ostream &operator<<(std::ostream &os, const digits<T> &d) {
     return os << "digits(" << d.get_base() << ")";
 }
+
+template <std::integral T>
+class integer {};
 
 } // namespace tokenizes::primitive

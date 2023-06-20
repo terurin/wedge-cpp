@@ -143,11 +143,11 @@ TEST(digits, base8_pass) {
     EXPECT_EQ(parser(ss).opt_right(), 017);
 }
 
-TEST(digits, base8_fail) {
+TEST(digits, base8_not_digit) {
     const auto parser = digits(8);
     std::stringstream ss;
     ss << "8";
-    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
+    EXPECT_EQ(parser(ss).opt_left(), digits_error::not_digit);
 }
 
 TEST(digits, base10_pass) {
@@ -164,13 +164,6 @@ TEST(digits, base10_over) {
     EXPECT_EQ(parser(ss).opt_right(), 10);
 }
 
-TEST(digits, base10_fail) {
-    const auto parser = digits(8);
-    std::stringstream ss;
-    ss << "a";
-    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
-}
-
 TEST(digits, base16_pass) {
     const auto parser = digits(16);
     std::stringstream ss;
@@ -178,11 +171,19 @@ TEST(digits, base16_pass) {
     EXPECT_EQ(parser(ss).opt_right(), 0x1F);
 }
 
-TEST(digits, base16_fail) {
+TEST(digits, base16_not_digit) {
     const auto parser = digits(16);
     std::stringstream ss;
     ss << "G";
-    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
+    EXPECT_EQ(parser(ss).opt_left(), digits_error::not_digit);
 }
+
+TEST(digits, base16_overflow) {
+    const auto parser = digits<uint8_t>(16);
+    std::stringstream ss;
+    ss << "100";
+    EXPECT_EQ(parser(ss).opt_left(), digits_error::overflow);
+}
+
 
 } // namespace digits_tests
