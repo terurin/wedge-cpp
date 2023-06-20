@@ -279,18 +279,18 @@ static inline std::optional<char> escape(char c) {
 either<std::string, string_errors> string_parser::operator()(std::istream &is) const {
     const std::streampos pos = is.tellg();
 
-    if (is.peek() != quote) {
+    if (quote(is).is_left()) {
         return left(string_errors::not_begin);
     }
-    is.ignore();
 
     std::string result;
     while (is) {
-        const int c = is.get();
-
-        if (c == quote) {
+        if (quote(is).is_right()) {
             return right(result);
-        } else if (c == '\\') {
+        }
+        
+        const int c = is.get();
+        if (c == '\\') {
             const int c2 = is.get();
             if (c2 == -1) {
                 is.seekg(pos);

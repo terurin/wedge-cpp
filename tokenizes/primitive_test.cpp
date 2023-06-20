@@ -432,7 +432,7 @@ TEST(integer_parser, base16_underflow_deny) {
 } // namespace integer_parser_tests
 
 namespace string_parser_tests {
-const static auto parser = string_parser('\'');
+const static auto parser = string_parser("'");
 
 TEST(string_parser, not_begin) {
     std::stringstream ss;

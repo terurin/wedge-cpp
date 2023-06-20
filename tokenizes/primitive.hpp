@@ -164,10 +164,10 @@ public:
 enum class string_errors { not_begin, not_end, bad_escape };
 
 class string_parser {
-    char quote;
+    tag quote;
 
 public:
-    string_parser(char _quote = '\'') : quote(_quote) {}
+    string_parser(std::string_view _quote = "'") : quote(_quote) {}
     either<std::string, string_errors> operator()(std::istream &is) const;
 };
 
