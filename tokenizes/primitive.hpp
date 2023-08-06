@@ -101,6 +101,16 @@ public:
     tag_list build() const { return tag_list(items); }
 };
 
+template <class T>
+class tag_mapper{
+    std::unordered_map<std::string, std::optional<T>> table;
+    size_t buffer_size;
+public:
+    tag_mapper(const std::unordered_map<std::string, T>&);
+    tag_mapper(std::initializer_list<std::tuple<std::string, T>>&&);
+    either<T,std::nullptr_t> operator()(std::istream &)const;
+};
+
 class digit_parser {
     unsigned int base;
 

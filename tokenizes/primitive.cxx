@@ -2,6 +2,101 @@
 #include "primitive.hpp"
 namespace tokenizes::primitive {
 
+template <class T>
+tag_mapper<T>::tag_mapper(const std::unordered_map<std::string, T> &m) {
+    size_t size = 0;
+    for (const auto &[key, _] : m) {
+        for (ssize_t i = 0; i < key.size(); i++) {
+            table.emplace(key.substr(0, i), std::nullopt);
+        }
+        size = std::max(size, key.size());
+    }
+    buffer_size = size;
+
+    // convert
+    for (const auto &[key, value] : m) {
+        table.insert_or_assign(key, value);
+    }
+}
+
+template <class T>
+tag_mapper<T>::tag_mapper(std::initializer_list<std::tuple<std::string, T>> &&m) {
+    size_t size = 0;
+    for (const auto &[key, _] : m) {
+        for (ssize_t i = 0; i < key.size(); i++) {
+            table.emplace(key.substr(0, i), std::nullopt);
+        }
+        size = std::max(size, key.size());
+    }
+    buffer_size = size;
+
+    // convert
+    for (const auto &[key, value] : m) {
+        table.insert_or_assign(key, value);
+    }
+}
+
+template <class T>
+either<T, std::nullptr_t> tag_mapper<T>::operator()(std::istream &is) const {
+
+    std::string buffer;
+    buffer.reserve(buffer_size);
+
+    // rollback info
+    T matched;
+    ssize_t position = is.tellg();
+
+    // non-matched loop
+    do {
+        const int input = is.get();
+        if (input == -1) {
+            // rollback
+            is.seekg(position);
+            return left(nullptr);
+        }
+        buffer.push_back(static_cast<char>(input));
+        const auto iter = table.find(buffer);
+        if (iter == table.end()) {
+            // rollback
+            is.seekg(position);
+            return left(nullptr);
+        }
+
+        const auto &[_, value] = *iter;
+        if (value) {
+            // update rollback
+            position = is.tellg();
+            matched = *value;
+            break;
+        }
+
+    } while (1);
+
+    // matched loop
+    do {
+        const int input = is.get();
+        if (input == -1) {
+            // rollback
+            is.seekg(position);
+            return right(matched);
+        }
+        buffer.push_back(static_cast<char>(input));
+        const auto iter = table.find(buffer);
+        if (iter == table.end()) {
+            // rollback
+            is.seekg(position);
+            return right(matched);
+        }
+
+        const auto &[_, value] = *iter;
+        if (value) {
+            // update rollback
+            position = is.tellg();
+            matched = *value;
+        }
+    } while (1);
+}
+
 template <std::unsigned_integral T>
 either<T, unsigned_errors> unsigned_parser<T>::operator()(std::istream &is) const {
     using namespace std;
@@ -142,4 +237,5 @@ either<T, integer_errors> integer_parser<T>::operator()(std::istream &is) const 
 
     return right(result);
 }
+
 } // namespace tokenizes::primitive
