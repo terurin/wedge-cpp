@@ -3,7 +3,7 @@
 namespace tokenizes::primitive {
 
 template <class T>
-tag_mapper<T>::tag_mapper(const std::unordered_map<std::string, T> &m) {
+tag_mapper<T>::tag_mapper(const std::vector<std::tuple<std::string_view, T>> &m) {
     size_t size = 0;
     for (const auto &[key, _] : m) {
         for (ssize_t i = 0; i < key.size(); i++) {
@@ -15,12 +15,12 @@ tag_mapper<T>::tag_mapper(const std::unordered_map<std::string, T> &m) {
 
     // convert
     for (const auto &[key, value] : m) {
-        table.insert_or_assign(key, value);
+        table.insert_or_assign(std::string(key), value);
     }
 }
 
 template <class T>
-tag_mapper<T>::tag_mapper(std::initializer_list<std::tuple<std::string, T>> &&m) {
+tag_mapper<T>::tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&m) {
     size_t size = 0;
     for (const auto &[key, _] : m) {
         for (ssize_t i = 0; i < key.size(); i++) {
@@ -32,7 +32,7 @@ tag_mapper<T>::tag_mapper(std::initializer_list<std::tuple<std::string, T>> &&m)
 
     // convert
     for (const auto &[key, value] : m) {
-        table.insert_or_assign(key, value);
+        table.insert_or_assign(std::string(key), value);
     }
 }
 

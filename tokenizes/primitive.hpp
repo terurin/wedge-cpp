@@ -106,8 +106,8 @@ class tag_mapper{
     std::unordered_map<std::string, std::optional<T>> table;
     size_t buffer_size;
 public:
-    tag_mapper(const std::unordered_map<std::string, T>&);
-    tag_mapper(std::initializer_list<std::tuple<std::string, T>>&&);
+    tag_mapper(const std::vector<std::tuple<std::string_view, T>>&);
+    tag_mapper(std::initializer_list<std::tuple<std::string_view, T>>&&);
     either<T,std::nullptr_t> operator()(std::istream &)const;
 };
 
