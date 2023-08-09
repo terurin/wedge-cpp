@@ -1,18 +1,18 @@
 // #include "parsers.hpp"
 
-#include "primitive.hpp"
+#include "tokens.hpp"
 #include <iostream>
 #include <regex>
 #include <sstream>
 using namespace std;
-// using namespace tokenizes;
+
 int main(int argc, char **argv) {
     stringstream ss;
     //ss << "hello_world";
     ss << "-0b1111";
     char c;
 
-    tokenizes::primitive::integer_parser parser;
+    tokenizes::tokens::token_parser parser;
 
     if (auto e = parser(ss); e.is_right()) {
         cout << e.get_right();

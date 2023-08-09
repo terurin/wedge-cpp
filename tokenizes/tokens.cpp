@@ -1,1 +1,82 @@
 #include "tokens.hpp"
+#include <algorithm>
+#include <iomanip>
+#include <unordered_map>
+#include <vector>
+namespace tokenizes::tokens {
+
+using eithers::right, eithers::left;
+
+struct general_record {
+    token_id id;
+    const char *name;
+};
+
+constinit static general_record general_records[]{
+#define member(x) {token_id::x, #x}
+    member(variable), member(boolean), member(integer), member(real), member(text)
+#undef member
+};
+
+struct mark_record {
+    token_id id;
+    const char *name;
+    const char *mark;
+};
+
+constinit static mark_record mark_records[]{
+#define member(x, y) {token_id::x, #x, y}
+    member(assign, "="), member(add, "+"), member(sub, "-"), member(mul, "*"), member(div, "*"), member(mod, "%"),
+#undef member
+};
+
+std::ostream &operator<<(std::ostream &os, token_id id) {
+    using std::string, std::optional, std::nullopt;
+
+    const static auto find_id = [](token_id id) -> optional<const char *> {
+        // general_records
+        for (const auto &item : general_records) {
+            if (item.id == id) {
+                return item.name;
+            }
+        }
+
+        // mark_records
+        for (const auto &item : mark_records) {
+            if (item.id == id) {
+                return item.name;
+            }
+        }
+        return nullopt;
+    };
+
+    const char *name = find_id(id).value_or("unknown");
+
+    return os << name << "(" << static_cast<int>(id) << ")";
+}
+
+std::ostream &operator<<(std::ostream &os, const value_t &v) {
+    if (const bool *p = std::get_if<bool>(&v); p) {
+        return os << (*p ? "true" : "false");
+    }
+    if (const int *p = std::get_if<int>(&v); p) {
+        return os << *p;
+    }
+    if (const float *p = std::get_if<float>(&v); p) {
+        return os << *p;
+    }
+    if (const std::string *p = std::get_if<std::string>(&v); p) {
+        return os << std::quoted(*p);
+    }
+    return os << "none";
+}
+
+token_parser::token_parser() {}
+
+std::ostream &operator<<(std::ostream &os, const token &t) {
+    return os << "id:" << t.get_id() << ",value:" << t.get_value();
+}
+
+either<token, std::nullptr_t> token_parser::operator()(std::istream &is) { return left(nullptr); }
+
+} // namespace tokenizes::tokens
