@@ -1,6 +1,8 @@
 #pragma once
 #include "either.hpp"
+#include "primitive.hpp"
 #include <ios>
+#include <memory>
 #include <string>
 #include <variant>
 namespace tokenizes::tokens {
@@ -49,7 +51,8 @@ struct token {
 std::ostream &operator<<(std::ostream &, const token &);
 
 class token_parser {
-    // NOTE: cache parsers to reduce memory allcation
+    const static primitive::tag_mapper<token_id> marks;
+
 public:
     token_parser();
     either<token, std::nullptr_t> operator()(std::istream &is);

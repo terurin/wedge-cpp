@@ -6,6 +6,9 @@
 namespace tokenizes::tokens {
 
 using eithers::right, eithers::left;
+using primitive::tag_mapper;
+using std::initializer_list;
+using std::tuple, std::make_tuple;
 
 struct general_record {
     token_id id;
@@ -71,11 +74,19 @@ std::ostream &operator<<(std::ostream &os, const value_t &v) {
     return os << "none";
 }
 
-token_parser::token_parser() {}
-
 std::ostream &operator<<(std::ostream &os, const token &t) {
     return os << "id:" << t.get_id() << ",value:" << t.get_value();
 }
+
+const primitive::tag_mapper<token_id> token_parser::marks([]() {
+    std::vector<std::tuple<std::string_view, token_id>> table;
+    table.reserve(sizeof(mark_records) / sizeof(mark_records[0]));
+    for (const auto &item : mark_records) {
+        table.push_back({item.mark, item.id});
+    }
+    return table;
+}());
+token_parser::token_parser() {}
 
 either<token, std::nullptr_t> token_parser::operator()(std::istream &is) { return left(nullptr); }
 
