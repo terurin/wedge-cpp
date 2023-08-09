@@ -12,7 +12,7 @@ struct general_record {
     const char *name;
 };
 
-constinit static general_record general_records[]{
+constinit const static general_record general_records[]{
 #define member(x) {token_id::x, #x}
     member(variable), member(boolean), member(integer), member(real), member(text)
 #undef member
@@ -24,7 +24,7 @@ struct mark_record {
     const char *mark;
 };
 
-constinit static mark_record mark_records[]{
+constinit const static mark_record mark_records[]{
 #define member(x, y) {token_id::x, #x, y}
     member(assign, "="), member(add, "+"), member(sub, "-"), member(mul, "*"), member(div, "*"), member(mod, "%"),
 #undef member
