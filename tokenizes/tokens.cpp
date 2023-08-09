@@ -55,7 +55,7 @@ std::ostream &operator<<(std::ostream &os, token_id id) {
 
     const char *name = find_id(id).value_or("unknown");
 
-    return os << name << "(" << static_cast<int>(id) << ")";
+    return os << name << "(0x" << std::hex << static_cast<int>(id) << ")";
 }
 
 std::ostream &operator<<(std::ostream &os, const value_t &v) {
@@ -88,6 +88,14 @@ const primitive::tag_mapper<token_id> token_parser::marks([]() {
 }());
 token_parser::token_parser() {}
 
-either<token, std::nullptr_t> token_parser::operator()(std::istream &is) { return left(nullptr); }
+either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
+    if (const std::optional<token_id> r = marks(is).opt_right(); r) {
+        // TODO: tokenの構造体をちゃんと作る
+        token t;
+        t.id = *r;
+        return right(t);
+    }
+    return left(nullptr);
+}
 
 } // namespace tokenizes::tokens
