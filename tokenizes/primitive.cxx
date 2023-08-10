@@ -3,9 +3,12 @@
 namespace tokenizes::primitive {
 
 template <class T>
-tag_mapper<T>::tag_mapper(const std::vector<std::tuple<std::string_view, T>> &m) {
+template <std::ranges::input_range R>
+
+    requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
+constexpr tag_mapper<T>::tag_mapper(R &&r) {
     size_t size = 0;
-    for (const auto &[key, _] : m) {
+    for (const auto &[key, _] : r) {
         for (ssize_t i = 0; i < key.size(); i++) {
             table.emplace(key.substr(0, i), std::nullopt);
         }
@@ -14,13 +17,13 @@ tag_mapper<T>::tag_mapper(const std::vector<std::tuple<std::string_view, T>> &m)
     buffer_size = size;
 
     // convert
-    for (const auto &[key, value] : m) {
+    for (const auto &[key, value] : r) {
         table.insert_or_assign(std::string(key), value);
     }
 }
 
 template <class T>
-tag_mapper<T>::tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&m) {
+constexpr tag_mapper<T>::tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&m) {
     size_t size = 0;
     for (const auto &[key, _] : m) {
         for (ssize_t i = 0; i < key.size(); i++) {

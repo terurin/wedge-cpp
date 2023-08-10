@@ -9,6 +9,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -102,13 +103,16 @@ public:
 };
 
 template <class T>
-class tag_mapper{
+class tag_mapper {
     std::unordered_map<std::string, std::optional<T>> table;
     size_t buffer_size;
+
 public:
-    tag_mapper(const std::vector<std::tuple<std::string_view, T>>&);
-    tag_mapper(std::initializer_list<std::tuple<std::string_view, T>>&&);
-    either<T,std::nullptr_t> operator()(std::istream &)const;
+    template <std::ranges::input_range R>
+        requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
+    constexpr tag_mapper(R &&);
+    constexpr tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&);
+    either<T, std::nullptr_t> operator()(std::istream &) const;
 };
 
 class digit_parser {
