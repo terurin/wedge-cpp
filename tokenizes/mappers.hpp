@@ -5,9 +5,9 @@
 #include <cstddef>
 #include <exception>
 #include <functional>
+#include <ios>
 #include <istream>
 #include <optional>
-
 namespace tokenizes::mappers {
 
 using tokenizes::concepts::either_of;
@@ -231,6 +231,41 @@ public:
 struct position {
     const std::streampos begin, end;
     position(std::streampos _begin, std::streampos _end) : begin(_begin), end(_end) {}
+    size_t size() const { return end - begin; }
+};
+
+std::ostream &operator<<(std::ostream &os, const position &p);
+
+template <parsable P, std::invocable<right_of<P>> M>
+class positioned {
+public:
+    using right_t = std::tuple<position, std::invoke_result_t<M, right_of<P>>>;
+    using left_t = left_of<P>;
+
+private:
+    P parser;
+
+public:
+    constexpr positioned(const P &_parser) : parser(_parser) {}
+    constexpr positioned(P &&_parser) : parser(_parser) {}
+    either<right_t, left_t> operator()(std::istream &is) const {
+        const std::streampos begin = is.tellg();
+        const either<right_of<P>, left_of<P>> result = parser(is);
+
+        switch (result.get_mode()) {
+        case either_mode::right: {
+            const std::streampos end = is.tellg();
+            return right(std::make_tuple<position, right_of<P>>(position(begin, end), result.get_right()));
+        }
+
+        case either_mode::left:
+            return result.into_left();
+        case either_mode::none:
+            throw std::range_error("result is none");
+        default:
+            throw std::domain_error("mode domain error");
+        }
+    }
 };
 
 } // namespace tokenizes::mappers
