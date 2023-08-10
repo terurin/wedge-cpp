@@ -1,5 +1,6 @@
 #pragma once
 #include "either.hpp"
+#include "mappers.hpp"
 #include "primitive.hpp"
 #include <ios>
 #include <memory>
@@ -8,6 +9,7 @@
 namespace tokenizes::tokens {
 
 using eithers::either;
+using mappers::position;
 
 constexpr static inline uint32_t token_id_specials = 0 << 16;
 constexpr static inline uint32_t token_id_marks = 1 << 16;
@@ -40,12 +42,12 @@ using value_t = std::variant<std::monostate, bool, int, float, std::string>;
 std::ostream &operator<<(std::ostream &, const value_t &);
 
 struct token {
-    token_id id;
-    value_t value;
-    // size_t begin, end; position
+    const token_id id;
+    const value_t value;
+    const position pos;
 
-    token_id get_id() const { return id; }
-    const value_t &get_value() const { return value; }
+    token(token_id _id, const value_t &_value, const position &_pos) : id(_id), value(_value), pos(_pos) {}
+    token(token_id _id, value_t &&_value, position &&_pos) : id(_id), value(_value), pos(_pos) {}
 };
 
 std::ostream &operator<<(std::ostream &, const token &);

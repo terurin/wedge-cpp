@@ -228,4 +228,9 @@ public:
     }
 };
 
+struct position {
+    const std::streampos begin, end;
+    position(std::streampos _begin, std::streampos _end) : begin(_begin), end(_end) {}
+};
+
 } // namespace tokenizes::mappers

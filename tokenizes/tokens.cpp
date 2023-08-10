@@ -74,9 +74,7 @@ std::ostream &operator<<(std::ostream &os, const value_t &v) {
     return os << "none";
 }
 
-std::ostream &operator<<(std::ostream &os, const token &t) {
-    return os << "id:" << t.get_id() << ",value:" << t.get_value();
-}
+std::ostream &operator<<(std::ostream &os, const token &t) { return os << "id:" << t.id << ",value:" << t.value; }
 
 const primitive::tag_mapper<token_id> token_parser::marks([]() {
     std::vector<std::tuple<std::string_view, token_id>> table;
@@ -89,13 +87,14 @@ const primitive::tag_mapper<token_id> token_parser::marks([]() {
 token_parser::token_parser() {}
 
 either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
+    const std::streampos begin = is.tellg();
     if (const std::optional<token_id> r = marks(is).opt_right(); r) {
         // TODO: tokenの構造体をちゃんと作る
-        token t;
-        t.id = *r;
-        return right(t);
+
+        const std::streampos end = is.tellg();
+        return right<token>(token(*r, std::monostate(), position(begin, end)));
     }
-    return left(nullptr);
+    return left<nullptr_t>(nullptr);
 }
 
 } // namespace tokenizes::tokens
