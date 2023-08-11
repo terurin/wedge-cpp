@@ -236,10 +236,10 @@ struct position {
 
 std::ostream &operator<<(std::ostream &os, const position &p);
 
-template <parsable P, std::invocable<right_of<P>> M>
+template <parsable P>
 class positioned {
 public:
-    using right_t = std::tuple<position, std::invoke_result_t<M, right_of<P>>>;
+    using right_t = std::tuple<position, right_of<P>>;
     using left_t = left_of<P>;
 
 private:
