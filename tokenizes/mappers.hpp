@@ -248,13 +248,16 @@ private:
     constexpr static node_ptr build_root(R &&);
     constexpr static void build_node(node_t &, std::string_view, const T &);
     constexpr static std::optional<T> walk_node(const node_t &, std::istream &);
+    constexpr static node_ptr copy_root(const node_t &src);
+    constexpr static void copy_node(node_t &dest, const node_t &src);
 
 public:
     template <std::ranges::input_range R>
         requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
     constexpr tag_mapper(R &&r) : root(build_root(r)) {}
     constexpr tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&r) : root(build_root(r)) {}
-    constexpr tag_mapper(const tag_mapper &) = delete;
+    constexpr tag_mapper(const tag_mapper &tm) : root(copy_root(*tm.root)) {}
+    constexpr tag_mapper(tag_mapper &&tm) : root(std::move(tm.root)) {}
     constexpr either<T, std::nullptr_t> operator()(std::istream &is) const {
         if (const std::optional<T> opt = walk_node(*root, is); opt) {
             return right(*opt);

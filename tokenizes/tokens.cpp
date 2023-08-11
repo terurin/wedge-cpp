@@ -6,7 +6,7 @@
 namespace tokenizes::tokens {
 
 using eithers::right, eithers::left;
-using mappers::tag_mapper;
+using mappers::tag_mapper, mappers::positioned;
 using std::initializer_list;
 using std::tuple, std::make_tuple;
 
@@ -84,6 +84,7 @@ const mappers::tag_mapper<token_id> token_parser::marks([]() {
     }
     return table;
 }());
+
 token_parser::token_parser() {}
 
 either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
