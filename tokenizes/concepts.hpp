@@ -5,8 +5,8 @@
 #include <tuple>
 namespace tokenizes::concepts {
 template <typename P>
-concept parsable = std::invocable<P, std::istream &> && std::move_constructible<P> && std::copy_constructible<P> &&
-                   requires(const P &p, std::istream &is) {
+concept parsable = std::invocable<P, std::istream &> &&
+                   (std::move_constructible<P> || std::copy_constructible<P>)&&requires(const P &p, std::istream &is) {
                        typename decltype(p(is))::right_t;
                        typename decltype(p(is))::left_t;
                    };
