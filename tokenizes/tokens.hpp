@@ -53,7 +53,7 @@ struct token {
 std::ostream &operator<<(std::ostream &, const token &);
 
 class token_parser {
-    const static primitive::tag_mapper<token_id> marks;
+    const static mappers::tag_mapper<token_id> marks;
 
 public:
     token_parser();

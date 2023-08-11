@@ -134,30 +134,6 @@ TEST(tag_list, hola) {
 
 } // namespace tag_list_tests
 
-namespace tag_mapper_tests {
-
-const static tag_mapper<int> parser{{"one", 1}, {"two", 2}};
-
-TEST(tag_mapper_tests, one) {
-    std::stringstream ss;
-    ss << "one";
-    EXPECT_EQ(parser(ss).opt_right(), 1);
-}
-
-TEST(tag_mapper_tests, two) {
-    std::stringstream ss;
-    ss << "two";
-    EXPECT_EQ(parser(ss).opt_right(), 2);
-}
-
-TEST(tag_mapper_tests, zero) {
-    std::stringstream ss;
-    ss << "zero";
-    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
-}
-
-} // namespace tag_mapper_tests
-
 namespace digit_parser_tests {
 
 TEST(digit_parser, digit10_pass) {

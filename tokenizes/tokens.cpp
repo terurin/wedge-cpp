@@ -6,7 +6,7 @@
 namespace tokenizes::tokens {
 
 using eithers::right, eithers::left;
-using primitive::tag_mapper;
+using mappers::tag_mapper;
 using std::initializer_list;
 using std::tuple, std::make_tuple;
 
@@ -76,7 +76,7 @@ std::ostream &operator<<(std::ostream &os, const value_t &v) {
 
 std::ostream &operator<<(std::ostream &os, const token &t) { return os << "id:" << t.id << ",value:" << t.value; }
 
-const primitive::tag_mapper<token_id> token_parser::marks([]() {
+const mappers::tag_mapper<token_id> token_parser::marks([]() {
     std::vector<std::tuple<std::string_view, token_id>> table;
     table.reserve(sizeof(mark_records) / sizeof(mark_records[0]));
     for (const auto &item : mark_records) {

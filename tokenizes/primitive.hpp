@@ -104,39 +104,6 @@ public:
     tag_list build() const { return tag_list(items); }
 };
 
-template <class T>
-class tag_mapper {
-
-public:
-    struct node_t {
-        std::optional<T> value{std::nullopt};
-        std::array<std::unique_ptr<node_t>, 256> table;
-        node_t() { std::ranges::fill(table, nullptr); }
-    };
-    using node_ptr = std::unique_ptr<node_t>;
-    node_ptr root;
-
-private:
-    template <std::ranges::input_range R>
-        requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
-    constexpr static node_ptr build_root(R &&);
-    constexpr static void build_node(node_t &, std::string_view, const T &);
-    constexpr static std::optional<T> walk_node(const node_t &, std::istream &);
-
-public:
-    template <std::ranges::input_range R>
-        requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
-    constexpr tag_mapper(R &&r) : root(build_root(r)) {}
-    constexpr tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&r) : root(build_root(r)) {}
-    constexpr tag_mapper(const tag_mapper &) = delete;
-    constexpr either<T, std::nullptr_t> operator()(std::istream &is) const {
-        if (const std::optional<T> opt = walk_node(*root, is); opt) {
-            return right(*opt);
-        }
-        return left(nullptr);
-    }
-};
-
 class digit_parser {
     unsigned int base;
 
