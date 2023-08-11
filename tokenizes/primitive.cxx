@@ -4,100 +4,56 @@ namespace tokenizes::primitive {
 
 template <class T>
 template <std::ranges::input_range R>
-
     requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
-constexpr tag_mapper<T>::tag_mapper(R &&r) {
-    size_t size = 0;
-    for (const auto &[key, _] : r) {
-        for (ssize_t i = 0; i < key.size(); i++) {
-            table.emplace(key.substr(0, i), std::nullopt);
-        }
-        size = std::max(size, key.size());
-    }
-    buffer_size = size;
+constexpr tag_mapper<T>::node_ptr tag_mapper<T>::build_root(R &&r) {
 
-    // convert
+    node_ptr root = std::make_unique<node_t>();
     for (const auto &[key, value] : r) {
-        table.insert_or_assign(std::string(key), value);
+        build_node(*root, key, value);
+    }
+    return root;
+}
+
+template <class T>
+constexpr void tag_mapper<T>::build_node(node_t &node, std::string_view key, const T &value) {
+    if (key.size() == 0) {
+        node.value = value; // terminal
+        return;
+    }
+
+    const size_t index = static_cast<size_t>(key[0]);
+    const std::string_view next_key = key.substr(1);
+    assert(index < 256);
+
+    if (!node.table[index]) {
+        node_ptr next_node = std::make_unique<node_t>();
+        build_node(*next_node, next_key, value);
+        node.table[index] = std::move(next_node);
+    } else {
+        build_node(*node.table[index], next_key, value);
     }
 }
 
 template <class T>
-constexpr tag_mapper<T>::tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&m) {
-    size_t size = 0;
-    for (const auto &[key, _] : m) {
-        for (ssize_t i = 0; i < key.size(); i++) {
-            table.emplace(key.substr(0, i), std::nullopt);
-        }
-        size = std::max(size, key.size());
+constexpr std::optional<T> tag_mapper<T>::walk_node(const node_t &node, std::istream &is) {
+
+    const int index = is.get();
+
+    if (index == -1) {
+        return node.value;
     }
-    buffer_size = size;
+    assert(0 <= index && index < 256);
 
-    // convert
-    for (const auto &[key, value] : m) {
-        table.insert_or_assign(std::string(key), value);
+    if (node.table[index]) {
+        const node_t &next_node = *node.table[index];
+        const std::streampos pos = is.tellg();
+        if (const std::optional<T> next_value = walk_node(next_node, is); next_value) {
+            return next_value;
+        }
+        is.seekg(pos);
     }
-}
 
-template <class T>
-either<T, std::nullptr_t> tag_mapper<T>::operator()(std::istream &is) const {
-
-    std::string buffer;
-    buffer.reserve(buffer_size);
-
-    // rollback info
-    T matched;
-    ssize_t position = is.tellg();
-
-    // non-matched loop
-    do {
-        const int input = is.get();
-        if (input == -1) {
-            // rollback
-            is.seekg(position);
-            return left(nullptr);
-        }
-        buffer.push_back(static_cast<char>(input));
-        const auto iter = table.find(buffer);
-        if (iter == table.end()) {
-            // rollback
-            is.seekg(position);
-            return left(nullptr);
-        }
-
-        const auto &[_, value] = *iter;
-        if (value) {
-            // update rollback
-            position = is.tellg();
-            matched = *value;
-            break;
-        }
-
-    } while (1);
-
-    // matched loop
-    do {
-        const int input = is.get();
-        if (input == -1) {
-            // rollback
-            is.seekg(position);
-            return right(matched);
-        }
-        buffer.push_back(static_cast<char>(input));
-        const auto iter = table.find(buffer);
-        if (iter == table.end()) {
-            // rollback
-            is.seekg(position);
-            return right(matched);
-        }
-
-        const auto &[_, value] = *iter;
-        if (value) {
-            // update rollback
-            position = is.tellg();
-            matched = *value;
-        }
-    } while (1);
+    return node.value;
 }
 
 template <std::unsigned_integral T>
