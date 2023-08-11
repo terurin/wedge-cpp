@@ -251,12 +251,14 @@ private:
     constexpr static node_ptr copy_root(const node_t &src);
     constexpr static void copy_node(node_t &dest, const node_t &src);
 
+    constexpr tag_mapper(const node_t &n) : root(copy_root(n)) {}
+
 public:
     template <std::ranges::input_range R>
         requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
     constexpr tag_mapper(R &&r) : root(build_root(r)) {}
     constexpr tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&r) : root(build_root(r)) {}
-    constexpr tag_mapper(const tag_mapper &tm) : root(copy_root(*tm.root)) {}
+    constexpr tag_mapper(const tag_mapper &tm) = delete;
     constexpr tag_mapper(tag_mapper &&tm) : root(std::move(tm.root)) {}
     constexpr either<T, std::nullptr_t> operator()(std::istream &is) const {
         if (const std::optional<T> opt = walk_node(*root, is); opt) {
@@ -264,12 +266,13 @@ public:
         }
         return left(nullptr);
     }
+    constexpr tag_mapper<T> clone() const { return tag_mapper(copy_root(*root)); }
 };
 
 struct position {
-    const std::streampos begin, end;
-    position(std::streampos _begin, std::streampos _end) : begin(_begin), end(_end) {}
-    size_t size() const { return end - begin; }
+    const size_t begin, end;
+    constexpr position(size_t _begin, size_t _end) : begin(_begin), end(_end) {}
+    constexpr size_t size() const { return end - begin; }
 };
 
 std::ostream &operator<<(std::ostream &os, const position &p);
@@ -284,16 +287,21 @@ private:
     P parser;
 
 public:
-    constexpr positioned(const P &_parser) : parser(_parser) {}
-    constexpr positioned(P &&_parser) : parser(_parser) {}
+    constexpr positioned(const P &_parser)
+        requires std::copy_constructible<P>
+        : parser(_parser) {}
+    constexpr positioned(P &&_parser)
+        requires std::move_constructible<P>
+        : parser(std::move(_parser)) {}
     either<right_t, left_t> operator()(std::istream &is) const {
         const std::streampos begin = is.tellg();
-        const either<right_of<P>, left_of<P>> result = parser(is);
+        either<right_of<P>, left_of<P>> result = parser(is);
 
         switch (result.get_mode()) {
         case either_mode::right: {
             const std::streampos end = is.tellg();
-            return right(std::make_tuple<position, right_of<P>>(position(begin, end), result.get_right()));
+
+            return right(std::tuple<position, right_of<P>>(position(begin, end), result.get_right()));
         }
 
         case either_mode::left:

@@ -76,24 +76,22 @@ std::ostream &operator<<(std::ostream &os, const value_t &v) {
 
 std::ostream &operator<<(std::ostream &os, const token &t) { return os << "id:" << t.id << ",value:" << t.value; }
 
-const mappers::tag_mapper<token_id> token_parser::marks([]() {
+const token_parser::mark_parser token_parser::marks([]() {
     std::vector<std::tuple<std::string_view, token_id>> table;
     table.reserve(sizeof(mark_records) / sizeof(mark_records[0]));
     for (const auto &item : mark_records) {
         table.push_back({item.mark, item.id});
     }
-    return table;
+    return tag_mapper<token_id>(table);
 }());
 
 token_parser::token_parser() {}
 
 either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
-    const std::streampos begin = is.tellg();
-    if (const std::optional<token_id> r = marks(is).opt_right(); r) {
-        // TODO: tokenの構造体をちゃんと作る
+    if (const std::optional<std::tuple<position, token_id>> r = marks(is).opt_right(); r) {
+        const auto &[pos, id] = *r;
 
-        const std::streampos end = is.tellg();
-        return right<token>(token(*r, std::monostate(), position(begin, end)));
+        return right<token>(token(id, std::monostate(), pos));
     }
     return left<nullptr_t>(nullptr);
 }
