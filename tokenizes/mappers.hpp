@@ -31,8 +31,12 @@ private:
     M map;
 
 public:
-    mapper_right(const P &_parser, M &&_map) : parser(_parser), map(_map) {}
-    mapper_right(P &&_parser, M &&_map) : parser(_parser), map(_map) {}
+    mapper_right(const P &_parser, M &&_map)
+        requires std::copy_constructible<P> && std::move_constructible<M>
+        : parser(_parser), map(_map) {}
+    mapper_right(P &&_parser, M &&_map)
+        requires std::move_constructible<P> && std::move_constructible<M>
+        : parser(_parser), map(_map) {}
     either<right_t, left_t> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -58,8 +62,12 @@ private:
     M map;
 
 public:
-    mapper_left(const P &_parser, M &&_map) : parser(_parser), map(_map) {}
-    mapper_left(P &&_parser, M &&_map) : parser(_parser), map(_map) {}
+    mapper_left(const P &_parser, M &&_map)
+        requires std::copy_constructible<P> && std::move_constructible<M>
+        : parser(_parser), map(_map) {}
+    mapper_left(P &&_parser, M &&_map)
+        requires std::move_constructible<P> && std::move_constructible<M>
+        : parser(_parser), map(_map) {}
 
     either<right_t, left_t> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
@@ -85,8 +93,12 @@ private:
     V value;
 
 public:
-    constant_right(const P &_parser, V &&_value) : parser(_parser), value(_value) {}
-    constant_right(P &&_parser, V &&_value) : parser(_parser), value(_value) {}
+    constant_right(const P &_parser, V &&_value)
+        requires std::copy_constructible<P> && std::move_constructible<V>
+        : parser(_parser), value(_value) {}
+    constant_right(P &&_parser, V &&_value)
+        requires std::move_constructible<P> && std::move_constructible<V>
+        : parser(_parser), value(_value) {}
 
     either<V, left_of<P>> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
@@ -112,8 +124,12 @@ private:
     V value;
 
 public:
-    constant_left(const P &_parser, V &&_value) : parser(_parser), value(_value) {}
-    constant_left(P &&_parser, V &&_value) : parser(_parser), value(_value) {}
+    constant_left(const P &_parser, V &&_value)
+        requires std::copy_constructible<P> && std::move_constructible<V>
+        : parser(_parser), value(_value) {}
+    constant_left(P &&_parser, V &&_value)
+        requires std::move_constructible<P> && std::move_constructible<V>
+        : parser(_parser), value(_value) {}
 
     either<right_of<P>, V> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
@@ -135,8 +151,12 @@ class eraser_right {
     P parser;
 
 public:
-    eraser_right(const P &_parser) : parser(_parser) {}
-    eraser_right(P &&_parser) : parser(_parser) {}
+    eraser_right(const P &_parser)
+        requires std::copy_constructible<P>
+        : parser(_parser) {}
+    eraser_right(P &&_parser)
+        requires std::move_constructible<P>
+        : parser(_parser) {}
     either<std::nullptr_t, left_of<P>> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -157,8 +177,12 @@ class eraser_left {
     P parser;
 
 public:
-    eraser_left(const P &_parser) : parser(_parser) {}
-    eraser_left(P &&_parser) : parser(_parser) {}
+    eraser_left(const P &_parser)
+        requires std::copy_constructible<P>
+        : parser(_parser) {}
+    eraser_left(P &&_parser)
+        requires std::move_constructible<P>
+        : parser(_parser) {}
     either<right_of<P>, std::nullptr_t> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -179,8 +203,12 @@ class eraser_both {
     P parser;
 
 public:
-    eraser_both(const P &_parser) : parser(_parser) {}
-    eraser_both(P &&_parser) : parser(_parser) {}
+    eraser_both(const P &_parser)
+        requires std::copy_constructible<P>
+        : parser(_parser) {}
+    eraser_both(P &&_parser)
+        requires std::move_constructible<P>
+        : parser(_parser) {}
     either<std::nullptr_t, std::nullptr_t> operator()(std::istream &is) const {
         either_of<P> result = parser(is);
         switch (result.get_mode()) {
@@ -201,8 +229,12 @@ class recognition {
     P parser;
 
 public:
-    recognition(const P &_parser) : parser(_parser) {}
-    recognition(P &&_parser) : parser(_parser) {}
+    recognition(const P &_parser)
+        requires std::copy_constructible<P>
+        : parser(_parser) {}
+    recognition(P &&_parser)
+        requires std::move_constructible<P>
+        : parser(_parser) {}
     either<std::string, left_of<P>> operator()(std::istream &is) const {
         const std::streampos begin = is.tellg();
         either_of<P> result = parser(is);
