@@ -35,43 +35,10 @@ constexpr void tag_mapper<T>::build_node(node_t &node, std::string_view key, con
 }
 
 template <class T>
-constexpr std::optional<T> tag_mapper<T>::walk_node(const node_t &node, std::istream &is) {
-
-    const int index = is.get();
-
-    if (index == -1) {
-        return node.value;
-    }
-    assert(0 <= index && index < 256);
-
-    if (node.table[index]) {
-        const node_t &next_node = *node.table[index];
-        const std::streampos pos = is.tellg();
-        if (const std::optional<T> next_value = walk_node(next_node, is); next_value) {
-            return next_value;
-        }
-        is.seekg(pos);
-    }
-
-    return node.value;
-}
-
-template <class T>
 constexpr tag_mapper<T>::node_ptr tag_mapper<T>::copy_root(const node_t &src) {
     node_ptr root = std::make_unique<node_t>();
     copy_node(*root, src);
     return root;
-}
-
-template <class T>
-constexpr void tag_mapper<T>::copy_node(node_t &dest, const node_t &src) {
-    dest.value = src.value;
-    for (size_t i = 0; i < 256; i++) {
-        if (src.table[i]) {
-            dest.table[i]=std::make_unique<node_t>();
-            copy_node(*dest.table[i], *src.table[i]);
-        }
-    }
 }
 
 } // namespace tokenizes::mappers

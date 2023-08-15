@@ -270,6 +270,34 @@ public:
         std::optional<T> value{std::nullopt};
         std::array<std::unique_ptr<node_t>, 256> table;
         node_t() { std::ranges::fill(table, nullptr); }
+        node_t(const node_t &orign) {
+            std::ranges::fill(table, nullptr);
+            for (size_t i = 0; i < 256; i++) {
+                if (orign.table[i]) {
+                    table[i] = std::make_unique<node_t>(*orign.table[i]);
+                }
+            }
+        }
+
+        std::optional<T> find(std::istream &is) const {
+            const int index = is.get();
+
+            if (index == -1) {
+                return value;
+            }
+            assert(0 <= index && index < 256);
+
+            if (table[index]) {
+                const node_t &next_node = *table[index];
+                const std::streampos pos = is.tellg();
+                if (const std::optional<T> next_value = next_node.find(is); next_value) {
+                    return next_value;
+                }
+                is.seekg(pos);
+            }
+
+            return value;
+        }
     };
     using node_ptr = std::unique_ptr<node_t>;
     node_ptr root;
@@ -279,9 +307,7 @@ private:
         requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
     constexpr static node_ptr build_root(R &&);
     constexpr static void build_node(node_t &, std::string_view, const T &);
-    constexpr static std::optional<T> walk_node(const node_t &, std::istream &);
     constexpr static node_ptr copy_root(const node_t &src);
-    constexpr static void copy_node(node_t &dest, const node_t &src);
 
     constexpr tag_mapper(const node_t &n) : root(copy_root(n)) {}
 
@@ -293,7 +319,7 @@ public:
     constexpr tag_mapper(const tag_mapper &tm) = delete;
     constexpr tag_mapper(tag_mapper &&tm) : root(std::move(tm.root)) {}
     constexpr either<T, std::nullptr_t> operator()(std::istream &is) const {
-        if (const std::optional<T> opt = walk_node(*root, is); opt) {
+        if (const std::optional<T> opt = root->find(is); opt) {
             return right(*opt);
         }
         return left(nullptr);
