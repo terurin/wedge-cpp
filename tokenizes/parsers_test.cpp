@@ -40,3 +40,29 @@ TEST(shell, constant_fail) {
 }
 
 }; // namespace constant_tests
+
+namespace tag_mapper_tests {
+const static auto parser = tokenizes::tag_mapper<int>({{"1",1},{"2",2}});
+TEST(shell, tag_mapper_zero) {
+
+    std::stringstream ss;
+    ss << "0";
+    EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
+}
+
+TEST(shell, tag_mapper_one) {
+
+    std::stringstream ss;
+    ss << "1";
+    EXPECT_EQ(parser(ss).opt_right(), 1);
+}
+
+TEST(shell, tag_mapper_two) {
+
+    std::stringstream ss;
+    ss << "2";
+    EXPECT_EQ(parser(ss).opt_right(), 2);
+}
+
+}; // namespace constant_tests
+
