@@ -169,4 +169,11 @@ TEST(tag_mapper_tests, zero) {
     EXPECT_EQ(parser(ss).opt_right(), std::nullopt);
 }
 
+TEST(tag_mapper_tests, clone) {
+    const static auto clone = parser;
+    std::stringstream ss;
+    ss << "one";
+    EXPECT_EQ(parser(ss).opt_right(),1);
+}
+
 } // namespace tag_mapper_tests

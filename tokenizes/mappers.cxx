@@ -36,8 +36,7 @@ constexpr void tag_mapper<T>::build_node(node_t &node, std::string_view key, con
 
 template <class T>
 constexpr tag_mapper<T>::node_ptr tag_mapper<T>::copy_root(const node_t &src) {
-    node_ptr root = std::make_unique<node_t>();
-    copy_node(*root, src);
+    node_ptr root = std::make_unique<node_t>(src);
     return root;
 }
 

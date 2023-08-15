@@ -316,7 +316,7 @@ public:
         requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
     constexpr tag_mapper(R &&r) : root(build_root(r)) {}
     constexpr tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&r) : root(build_root(r)) {}
-    constexpr tag_mapper(const tag_mapper &tm) = delete;
+    constexpr tag_mapper(const tag_mapper &tm) : tag_mapper(*tm.root) {}
     constexpr tag_mapper(tag_mapper &&tm) : root(std::move(tm.root)) {}
     constexpr either<T, std::nullptr_t> operator()(std::istream &is) const {
         if (const std::optional<T> opt = root->find(is); opt) {
@@ -324,7 +324,6 @@ public:
         }
         return left(nullptr);
     }
-    constexpr tag_mapper<T> clone() const { return tag_mapper(copy_root(*root)); }
 };
 
 struct position {
