@@ -120,13 +120,13 @@ static inline shell<std::string, nullptr_t> tag_list(std::initializer_list<std::
 }
 
 // tag mapper
-template <class T>
-static inline shell<T, nullptr_t> tag_mapper(const std::vector<std::tuple<std::string_view, T>> &items) {
+template <class T> 
+static inline shell<T, nullptr_t> tag_mapper(const std::vector<std::tuple<std::string_view,T>>& items) {
     return shell(std::move(mappers::tag_mapper<T>(items)));
 }
 
-template <class T>
-static inline shell<T, nullptr_t> tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> items) {
+template <class T> 
+static inline shell<T, nullptr_t> tag_mapper(std::initializer_list<std::tuple<std::string_view,T>> items) {
     return shell(std::move(mappers::tag_mapper<T>(items)));
 }
 
