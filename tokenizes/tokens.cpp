@@ -89,12 +89,15 @@ either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
             }
             return table;
         }())
-            .positioned();
+            .positioned()
+            .map_right([](const std::tuple<position, token_id>& args) {
+                const auto &[pos, id] = args;
+                return token(id, std::monostate(), pos);
+            });
 
-    if (const std::optional<std::tuple<position, token_id>> r = marks(is).opt_right(); r) {
-        const auto &[pos, id] = *r;
+    if (const auto r = marks(is).opt_right(); r) {
 
-        return right<token>(token(id, std::monostate(), pos));
+        return right<token>(*r);
     }
     return left<nullptr_t>(nullptr);
 }

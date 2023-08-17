@@ -50,23 +50,23 @@ public:
     // map_*
     template <class F>
     auto map_right(F &&func) const {
-        return shell(mappers::mapper_right(*this, std::move(func)));
+        return shell<typename std::invoke_result_t<F, R>, L>(mappers::mapper_right(*this, std::move(func)));
     }
 
     template <class F>
     auto map_left(F &&func) const {
-        return shell(mappers::mapper_left(*this, std::move(func)));
+        return shell<R, typename std::invoke_result_t<F, L>>(mappers::mapper_left(*this, std::move(func)));
     }
 
     // const_*
     template <class V>
     auto const_right(V &&v) const {
-        return shell(mappers::constant_right(*this, std::move(v)));
+        return shell<V, L>(mappers::constant_right(*this, std::move(v)));
     }
 
     template <class V>
     auto const_left(V &&v) const {
-        return shell(mappers::constant_left(*this, std::move(v)));
+        return shell<R, V>(mappers::constant_left(*this, std::move(v)));
     }
 
     // repeat, many
@@ -120,13 +120,13 @@ static inline shell<std::string, nullptr_t> tag_list(std::initializer_list<std::
 }
 
 // tag mapper
-template <class T> 
-static inline shell<T, nullptr_t> tag_mapper(const std::vector<std::tuple<std::string_view,T>>& items) {
+template <class T>
+static inline shell<T, nullptr_t> tag_mapper(const std::vector<std::tuple<std::string_view, T>> &items) {
     return shell(std::move(mappers::tag_mapper<T>(items)));
 }
 
-template <class T> 
-static inline shell<T, nullptr_t> tag_mapper(std::initializer_list<std::tuple<std::string_view,T>> items) {
+template <class T>
+static inline shell<T, nullptr_t> tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> items) {
     return shell(std::move(mappers::tag_mapper<T>(items)));
 }
 
