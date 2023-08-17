@@ -130,4 +130,11 @@ static inline shell<T, nullptr_t> tag_mapper(std::initializer_list<std::tuple<st
     return shell(std::move(mappers::tag_mapper<T>(items)));
 }
 
+// wrapper
+template <std::signed_integral T = int>
+static inline shell<T, primitive::integer_errors> integer() {
+    return shell(std::move(primitive::integer_parser<T>()));
+}
+
+
 } // namespace tokenizes

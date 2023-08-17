@@ -90,10 +90,15 @@ either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
             return table;
         }())
             .positioned()
-            .map_right([](const std::tuple<position, token_id>& args) {
+            .map_right([](const std::tuple<position, token_id> &args) {
                 const auto &[pos, id] = args;
                 return token(id, std::monostate(), pos);
             });
+
+    const static auto integer = tokenizes::integer().positioned().map_right([](const std::tuple<position, int> &args) {
+        const auto &[pos, value] = args;
+        return token(token_id::integer, value, pos);
+    });
 
     if (const auto r = marks(is).opt_right(); r) {
 
