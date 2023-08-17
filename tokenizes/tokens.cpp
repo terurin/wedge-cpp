@@ -1,4 +1,5 @@
 #include "tokens.hpp"
+#include "parsers.hpp"
 #include <algorithm>
 #include <iomanip>
 #include <unordered_map>
@@ -6,7 +7,6 @@
 namespace tokenizes::tokens {
 
 using eithers::right, eithers::left;
-using mappers::tag_mapper, mappers::positioned;
 using std::initializer_list;
 using std::tuple, std::make_tuple;
 
@@ -76,18 +76,21 @@ std::ostream &operator<<(std::ostream &os, const value_t &v) {
 
 std::ostream &operator<<(std::ostream &os, const token &t) { return os << "id:" << t.id << ",value:" << t.value; }
 
-const token_parser::mark_parser token_parser::marks([]() {
-    std::vector<std::tuple<std::string_view, token_id>> table;
-    table.reserve(sizeof(mark_records) / sizeof(mark_records[0]));
-    for (const auto &item : mark_records) {
-        table.push_back({item.mark, item.id});
-    }
-    return tag_mapper<token_id>(table);
-}());
-
 token_parser::token_parser() {}
 
 either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
+
+    const static auto marks =
+        tokenizes::tag_mapper<token_id>([]() -> std::vector<std::tuple<std::string_view, token_id>> {
+            std::vector<std::tuple<std::string_view, token_id>> table;
+            table.reserve(sizeof(mark_records) / sizeof(mark_records[0]));
+            for (const auto &item : mark_records) {
+                table.push_back({item.mark, item.id});
+            }
+            return table;
+        }())
+            .positioned();
+
     if (const std::optional<std::tuple<position, token_id>> r = marks(is).opt_right(); r) {
         const auto &[pos, id] = *r;
 

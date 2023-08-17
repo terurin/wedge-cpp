@@ -30,6 +30,7 @@ using tokenizes::eithers::either;
 using tokenizes::eithers::either_mode;
 using tokenizes::eithers::left;
 using tokenizes::eithers::right;
+using tokenizes::mappers::position;
 
 template <class R, class L>
 class shell {
@@ -43,7 +44,7 @@ private:
 
 public:
     shell(const parser_t &_parser) : parser(_parser) {}
-    shell(parser_t &&_parser) : parser(_parser) {}
+    shell(parser_t &&_parser) : parser(std::move(_parser)) {}
     either<R, L> operator()(std::istream &is) const { return parser(is); }
 
     // map_*
@@ -77,6 +78,9 @@ public:
     auto erase_right() const { return shell(eraser_right(*this)); }
     auto erase_left() const { return shell(eraser_left(*this)); }
     auto erase_both() const { return shell(eraser_both(*this)); }
+
+    // positioned
+    auto positioned() const { return shell<std::tuple<position, R>, L>(mappers::positioned(*this)); };
 };
 
 template <parsable P>
@@ -116,13 +120,13 @@ static inline shell<std::string, nullptr_t> tag_list(std::initializer_list<std::
 }
 
 // tag mapper
-template <class T> 
-static inline shell<T, nullptr_t> tag_mapper(const std::vector<std::tuple<std::string_view,T>>& items) {
+template <class T>
+static inline shell<T, nullptr_t> tag_mapper(const std::vector<std::tuple<std::string_view, T>> &items) {
     return shell(std::move(mappers::tag_mapper<T>(items)));
 }
 
-template <class T> 
-static inline shell<T, nullptr_t> tag_mapper(std::initializer_list<std::tuple<std::string_view,T>> items) {
+template <class T>
+static inline shell<T, nullptr_t> tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> items) {
     return shell(std::move(mappers::tag_mapper<T>(items)));
 }
 
