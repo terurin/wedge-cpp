@@ -266,16 +266,19 @@ template <class T>
 class tag_mapper {
 
 public:
-    struct node_t {
+    class node {
         std::optional<T> value{std::nullopt};
-        std::array<std::unique_ptr<node_t>, 256> table;
-        node_t() { std::ranges::fill(table, nullptr); }
-        node_t(const node_t &orign) {
+        std::array<std::unique_ptr<node>, 256> table;
+
+    public:
+        node() { std::ranges::fill(table, nullptr); }
+
+        template <std::ranges::input_range R>
+            requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
+        node(R &&range) {
             std::ranges::fill(table, nullptr);
-            for (size_t i = 0; i < 256; i++) {
-                if (orign.table[i]) {
-                    table[i] = std::make_unique<node_t>(*orign.table[i]);
-                }
+            for (const auto &[key, value] : range) {
+                insert(key, value);
             }
         }
 
@@ -288,7 +291,7 @@ public:
             assert(0 <= index && index < 256);
 
             if (table[index]) {
-                const node_t &next_node = *table[index];
+                const node &next_node = *table[index];
                 const std::streampos pos = is.tellg();
                 if (const std::optional<T> next_value = next_node.find(is); next_value) {
                     return next_value;
@@ -298,27 +301,37 @@ public:
 
             return value;
         }
+
+        void insert(std::string_view key, const T &value) {
+            if (key.size() == 0) {
+                this->value = value; // terminal
+                return;
+            }
+
+            const size_t index = static_cast<size_t>(key[0]);
+            const std::string_view next_key = key.substr(1);
+            assert(index < 256);
+
+            if (!table[index]) {
+                auto next_node = std::make_unique<node>();
+                next_node->insert(next_key, value);
+                table[index] = std::move(next_node);
+            } else {
+                table[index]->insert(next_key, value);
+            }
+        }
     };
-    using node_ptr = std::unique_ptr<node_t>;
-    node_ptr root;
 
 private:
-    template <std::ranges::input_range R>
-        requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
-    constexpr static node_ptr build_root(R &&);
-    constexpr static void build_node(node_t &, std::string_view, const T &);
-    constexpr static node_ptr copy_root(const node_t &src);
-
-    constexpr tag_mapper(const node_t &n) : root(copy_root(n)) {}
+    mutable std::shared_ptr<node> root;
 
 public:
     template <std::ranges::input_range R>
         requires std::convertible_to<std::ranges::range_value_t<R>, std::tuple<std::string_view, T>>
-    constexpr tag_mapper(R &&r) : root(build_root(r)) {}
-    constexpr tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&r) : root(build_root(r)) {}
-    constexpr tag_mapper(const tag_mapper &tm) : tag_mapper(*tm.root) {}
-    constexpr tag_mapper(tag_mapper &&tm) : root(std::move(tm.root)) {}
-    constexpr either<T, std::nullptr_t> operator()(std::istream &is) const {
+    tag_mapper(R &&r) : root(std::make_shared<node>(r)) {}
+    tag_mapper(std::initializer_list<std::tuple<std::string_view, T>> &&list) : root(std::make_shared<node>(list)) { ; }
+    tag_mapper(const tag_mapper &tm) : root(tm.root) {}
+    either<T, std::nullptr_t> operator()(std::istream &is) const {
         if (const std::optional<T> opt = root->find(is); opt) {
             return right(*opt);
         }
