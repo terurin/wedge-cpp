@@ -212,7 +212,7 @@ public:
         }
         is.seekg(pos);
         {
-            either_t e = px(is);
+            either_t e = py(is);
             switch (e.get_mode()) {
             case either_mode::right:
                 return e.into_right();
