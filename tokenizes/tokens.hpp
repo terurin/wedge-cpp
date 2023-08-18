@@ -61,7 +61,7 @@ private:
 
 public:
     token_parser();
-    either<token, std::nullptr_t> operator()(std::istream &is);
+    either<token, std::string> operator()(std::istream &is);
 };
 
 } // namespace tokenizes::tokens

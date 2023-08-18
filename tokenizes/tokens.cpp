@@ -1,4 +1,5 @@
 #include "tokens.hpp"
+#include "combinators.hpp"
 #include "parsers.hpp"
 #include <algorithm>
 #include <iomanip>
@@ -78,7 +79,7 @@ std::ostream &operator<<(std::ostream &os, const token &t) { return os << "id:" 
 
 token_parser::token_parser() {}
 
-either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
+either<token, std::string> token_parser::operator()(std::istream &is) {
 
     const static auto marks =
         tokenizes::tag_mapper<token_id>([]() -> std::vector<std::tuple<std::string_view, token_id>> {
@@ -93,18 +94,20 @@ either<token, std::nullptr_t> token_parser::operator()(std::istream &is) {
             .map_right([](const std::tuple<position, token_id> &args) {
                 const auto &[pos, id] = args;
                 return token(id, std::monostate(), pos);
-            });
+            })
+            .const_left(std::string("failed to parse marks"));
 
-    const static auto integer = tokenizes::integer().positioned().map_right([](const std::tuple<position, int> &args) {
-        const auto &[pos, value] = args;
-        return token(token_id::integer, value, pos);
-    });
+    const static auto integer = tokenizes::integer()
+                                    .positioned()
+                                    .map_right([](const std::tuple<position, int> &args) {
+                                        const auto &[pos, value] = args;
+                                        return token(token_id::integer, value, pos);
+                                    })
+                                    .const_left(std::string("failed to parse integer"));
 
-    if (const auto r = marks(is).opt_right(); r) {
+    const static auto parser = combinators::branch(marks, integer);
 
-        return right<token>(*r);
-    }
-    return left<nullptr_t>(nullptr);
+    return parser(is);
 }
 
 } // namespace tokenizes::tokens
